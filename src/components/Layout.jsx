@@ -9,6 +9,7 @@ const NAV = [
   { id: 'corsi', label: 'Corsi', icon: '◫' },
   { id: 'comunicazioni', label: 'Comunicazioni', icon: '◻' },
   { id: 'automazioni', label: 'Automazioni', icon: '◈' },
+  { id: 'impostazioni', label: 'Impostazioni', icon: '◎' },
 ]
 
 const NAV_ADMIN = [
