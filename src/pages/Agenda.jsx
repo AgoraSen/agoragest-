@@ -78,21 +78,42 @@ export default function Agenda() {
     setAppuntamenti(data||[])
   }
 
-  async function checkConflictFor(sala, data, oraInizio, oraFine, excludeId) {
-    if (!sala || !data || !oraInizio || !oraFine) return null
+  async function checkConflictFor(sala, data, oraInizio, oraFine, excludeId, operatoreId, candidatoId) {
+    if (!data || !oraInizio || !oraFine) return []
     const { data: appts } = await supabase
       .from('appuntamenti')
-      .select('id,titolo,ora_inizio,ora_fine,profiles(nome,cognome)')
-      .eq('sala', sala).eq('data', data).eq('stato','attivo')
-    const overlaps = (appts||[]).filter(a => {
+      .select('id,titolo,ora_inizio,ora_fine,sala,operatore_id,candidato_id,profiles(nome,cognome),candidati(nome,cognome)')
+      .eq('data', data).eq('stato','attivo')
+    const warnings = []
+    const overlaps = a => {
       if (a.id === excludeId) return false
       const aS = timeToMin(a.ora_inizio?.slice(0,5))
       const aE = timeToMin(a.ora_fine?.slice(0,5))
       const fS = timeToMin(oraInizio)
       const fE = timeToMin(oraFine)
       return fS < aE && fE > aS
-    })
-    return overlaps[0] || null
+    }
+    // 1. Sala occupata
+    if (sala) {
+      const salaBusy = (appts||[]).filter(a => a.sala === sala && overlaps(a))
+      if (salaBusy.length > 0) warnings.push({ tipo:'sala', msg:`Sala "${sala}" già occupata: ${salaBusy[0].titolo} ${salaBusy[0].ora_inizio?.slice(0,5)}–${salaBusy[0].ora_fine?.slice(0,5)}` })
+    }
+    // 2. Operatore già occupato
+    if (operatoreId) {
+      const opBusy = (appts||[]).filter(a => a.operatore_id === operatoreId && overlaps(a))
+      if (opBusy.length > 0) {
+        const op = opBusy[0].profiles
+        warnings.push({ tipo:'operatore', msg:`Operatore già occupato: ${opBusy[0].titolo} ${opBusy[0].ora_inizio?.slice(0,5)}–${opBusy[0].ora_fine?.slice(0,5)}` })
+      }
+    }
+    // 3. Candidato già occupato
+    if (candidatoId) {
+      const candBusy = (appts||[]).filter(a => a.candidato_id === candidatoId && overlaps(a))
+      if (candBusy.length > 0) {
+        warnings.push({ tipo:'candidato', msg:`Candidato già in un appuntamento: ${candBusy[0].titolo} ${candBusy[0].ora_inizio?.slice(0,5)}–${candBusy[0].ora_fine?.slice(0,5)}` })
+      }
+    }
+    return warnings
   }
 
   function weekDays(offset) {
@@ -128,9 +149,9 @@ export default function Agenda() {
   async function handleFormChange(updates) {
     const newForm = { ...form, ...updates }
     setForm(newForm)
-    if (newForm.sala && newForm.data && newForm.ora_inizio && newForm.ora_fine) {
-      const c = await checkConflictFor(newForm.sala, newForm.data, newForm.ora_inizio, newForm.ora_fine, editId)
-      setConflict(c)
+    if (newForm.data && newForm.ora_inizio && newForm.ora_fine) {
+      const w = await checkConflictFor(newForm.sala, newForm.data, newForm.ora_inizio, newForm.ora_fine, editId, newForm.operatore_id, newForm.candidato_id)
+      setConflict(w)
     }
   }
 
@@ -269,29 +290,59 @@ export default function Agenda() {
                     ))}
                   </div>
                 ))}
-                {appuntamenti.map(a=>{
-                  const dayIdx=days.findIndex(d=>fmtDate(d)===a.data)
-                  if(dayIdx<0)return null
-                  const sMin=timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
-                  const eMin=timeToMin(a.ora_fine?.slice(0,5)||'10:00')
-                  const top=(sMin-H_START*60)/60*48
-                  const ht=Math.max((eMin-sMin)/60*48-2,18)
-                  return(
-                    <div key={a.id} style={{
-                      position:'absolute',top,height:ht,
-                      left:`calc(48px + ${dayIdx}*(100% - 48px)/5 + 2px)`,
-                      width:`calc((100% - 48px)/5 - 4px)`,
-                      background:TIPO_COLOR[a.tipo]||'#D3D1C7',color:TIPO_TEXT[a.tipo]||'#444',
-                      borderRadius:4,padding:'2px 5px',fontSize:11,cursor:'pointer',overflow:'hidden',zIndex:2,
-                    }} onClick={e=>{e.stopPropagation();setSelectedAppt(a);setShowDetail(true)}}>
-                      <div style={{fontWeight:600,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
-                        {a.candidati?`${a.candidati.nome} ${a.candidati.cognome}`:a.titolo}
+                {/* Rendering eventi con affiancamento sovrapposti */}
+                {days.map((d, dayIdx) => {
+                  const dateStr = fmtDate(d)
+                  const dayAppts = appuntamenti.filter(a => a.data === dateStr)
+                  // Calcola colonne per affiancamento
+                  const cols = []
+                  dayAppts.forEach(a => {
+                    const aS = timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
+                    const aE = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
+                    let placed = false
+                    for (let ci = 0; ci < cols.length; ci++) {
+                      const last = cols[ci][cols[ci].length-1]
+                      const lE = timeToMin(last.ora_fine?.slice(0,5)||'10:00')
+                      if (aS >= lE) { cols[ci].push(a); placed = true; break }
+                    }
+                    if (!placed) cols.push([a])
+                  })
+                  const totalCols = cols.length || 1
+                  const MAX_VISIBLE = 3
+                  return dayAppts.map(a => {
+                    const colIdx = cols.findIndex(col => col.includes(a))
+                    const sMin = timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
+                    const eMin = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
+                    const top = (sMin - H_START*60)/60*48
+                    const ht = Math.max((eMin-sMin)/60*48-2, 18)
+                    // Se troppe colonne, mostra badge +N sull'ultima visibile
+                    if (colIdx >= MAX_VISIBLE) return null
+                    const isLast = colIdx === MAX_VISIBLE-1 && totalCols > MAX_VISIBLE
+                    const extraCount = totalCols - MAX_VISIBLE
+                    const colW = `calc((100% - 48px)/${5 * Math.min(totalCols, MAX_VISIBLE)})`
+                    const leftOffset = `calc(48px + ${dayIdx}*(100% - 48px)/5 + ${colIdx}*(100% - 48px)/${5 * Math.min(totalCols, MAX_VISIBLE)} + 1px)`
+                    return (
+                      <div key={a.id} style={{
+                        position:'absolute', top, height:ht,
+                        left: leftOffset,
+                        width: `calc((100% - 48px)/${5 * Math.min(totalCols, MAX_VISIBLE)} - 2px)`,
+                        background:TIPO_COLOR[a.tipo]||'#D3D1C7', color:TIPO_TEXT[a.tipo]||'#444',
+                        borderRadius:4, padding:'2px 5px', fontSize:11, cursor:'pointer', overflow:'hidden', zIndex:2+colIdx,
+                      }} onClick={e=>{e.stopPropagation();setSelectedAppt(a);setShowDetail(true)}}>
+                        <div style={{fontWeight:600,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
+                          {a.candidati?`${a.candidati.nome} ${a.candidati.cognome}`:a.titolo}
+                        </div>
+                        {ht>28&&<div style={{opacity:.9,fontSize:10}}>{a.ora_inizio?.slice(0,5)}–{a.ora_fine?.slice(0,5)}</div>}
+                        {ht>42&&<div style={{opacity:.85,fontSize:10}}>{a.sala}</div>}
+                        {ht>56&&a.profiles&&<div style={{opacity:.85,fontSize:10}}>{a.profiles.nome} {a.profiles.cognome}</div>}
+                        {isLast && extraCount > 0 && (
+                          <div style={{position:'absolute',bottom:2,right:3,background:'rgba(0,0,0,0.2)',borderRadius:4,padding:'1px 4px',fontSize:10,fontWeight:600}}>
+                            +{extraCount}
+                          </div>
+                        )}
                       </div>
-                      {ht>28&&<div style={{opacity:.9,fontSize:10}}>{a.ora_inizio?.slice(0,5)}–{a.ora_fine?.slice(0,5)}</div>}
-                      {ht>42&&<div style={{opacity:.85,fontSize:10}}>{a.sala}</div>}
-                      {ht>56&&a.profiles&&<div style={{opacity:.85,fontSize:10}}>{a.profiles.nome} {a.profiles.cognome}</div>}
-                    </div>
-                  )
+                    )
+                  })
                 })}
               </div>
             </div>
@@ -494,10 +545,13 @@ export default function Agenda() {
                 {sale.filter(sl=>sl.attiva).map(sl=><option key={sl.id}>{sl.nome}</option>)}
               </select>
             </div>
-            {conflict&&(
-              <div style={{background:'#FCEBEB',border:'0.5px solid #E24B4A',borderRadius:8,padding:'8px 12px',fontSize:13,color:'#791F1F'}}>
-                ⚠️ <strong>Sala occupata!</strong> {conflict.titolo} · {conflict.ora_inizio?.slice(0,5)}–{conflict.ora_fine?.slice(0,5)}
-                {conflict.profiles&&` (${conflict.profiles.nome} ${conflict.profiles.cognome})`}
+            {conflict && conflict.length > 0 && (
+              <div style={{display:'flex',flexDirection:'column',gap:6}}>
+                {conflict.map((w,i) => (
+                  <div key={i} style={{background:'#FCEBEB',border:'0.5px solid #E24B4A',borderRadius:8,padding:'8px 12px',fontSize:13,color:'#791F1F'}}>
+                    ⚠️ <strong>{w.tipo==='sala'?'Sala occupata':w.tipo==='operatore'?'Operatore occupato':'Candidato già prenotato'}:</strong> {w.msg}
+                  </div>
+                ))}
               </div>
             )}
             <div style={s.field}><label style={s.label}>Data</label>
@@ -521,8 +575,8 @@ export default function Agenda() {
             </div>
             <div style={{display:'flex',gap:8,justifyContent:'flex-end',marginTop:4}}>
               <button style={s.btnSecondary} onClick={()=>{setShowModal(false);setConflict(null)}}>Annulla</button>
-              <button style={{...s.btnPrimary,...(conflict?{background:'#e05a00',borderColor:'#e05a00'}:{})}} onClick={saveAppt}>
-                {conflict?'Salva comunque':'Salva'}
+              <button style={{...s.btnPrimary,...(conflict&&conflict.length>0?{background:'#e05a00',borderColor:'#e05a00'}:{})}} onClick={saveAppt}>
+                {conflict&&conflict.length>0?'Salva comunque':'Salva'}
               </button>
             </div>
           </div>
