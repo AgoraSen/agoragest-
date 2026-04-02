@@ -290,56 +290,66 @@ export default function Agenda() {
                     ))}
                   </div>
                 ))}
-                {/* Rendering eventi con affiancamento sovrapposti */}
+                {/* Rendering eventi con affiancamento corretto per giorno */}
                 {days.map((d, dayIdx) => {
                   const dateStr = fmtDate(d)
                   const dayAppts = appuntamenti.filter(a => a.data === dateStr)
-                  // Calcola colonne per affiancamento
-                  const cols = []
+                  if (!dayAppts.length) return null
+
+                  // Calcola gruppi sovrapposti e assegna colonne
+                  const assigned = [] // { appt, col, totalCols }
+                  const columns = [] // ogni colonna è array di appuntamenti
+
                   dayAppts.forEach(a => {
                     const aS = timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
                     const aE = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
                     let placed = false
-                    for (let ci = 0; ci < cols.length; ci++) {
-                      const last = cols[ci][cols[ci].length-1]
-                      const lE = timeToMin(last.ora_fine?.slice(0,5)||'10:00')
-                      if (aS >= lE) { cols[ci].push(a); placed = true; break }
+                    for (let ci = 0; ci < columns.length; ci++) {
+                      const conflicts = columns[ci].some(b => {
+                        const bS = timeToMin(b.ora_inizio?.slice(0,5)||'09:00')
+                        const bE = timeToMin(b.ora_fine?.slice(0,5)||'10:00')
+                        return aS < bE && aE > bS
+                      })
+                      if (!conflicts) { columns[ci].push(a); assigned.push({a, col:ci}); placed = true; break }
                     }
-                    if (!placed) cols.push([a])
+                    if (!placed) { columns.push([a]); assigned.push({a, col:columns.length-1}) }
                   })
-                  const totalCols = cols.length || 1
-                  const MAX_VISIBLE = 3
-                  return dayAppts.map(a => {
-                    const colIdx = cols.findIndex(col => col.includes(a))
-                    const sMin = timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
-                    const eMin = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
-                    const top = (sMin - H_START*60)/60*48
-                    const ht = Math.max((eMin-sMin)/60*48-2, 18)
-                    // Se troppe colonne, mostra badge +N sull'ultima visibile
-                    if (colIdx >= MAX_VISIBLE) return null
-                    const isLast = colIdx === MAX_VISIBLE-1 && totalCols > MAX_VISIBLE
-                    const extraCount = totalCols - MAX_VISIBLE
-                    const colW = `calc((100% - 48px)/${5 * Math.min(totalCols, MAX_VISIBLE)})`
-                    const leftOffset = `calc(48px + ${dayIdx}*(100% - 48px)/5 + ${colIdx}*(100% - 48px)/${5 * Math.min(totalCols, MAX_VISIBLE)} + 1px)`
+
+                  // Per ogni appuntamento calcola quante colonne occupa il suo gruppo
+                  return assigned.map(({a, col}) => {
+                    const aS = timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
+                    const aE = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
+                    // Trova tutte le colonne che si sovrappongono con questo appuntamento
+                    const overlappingCols = new Set([col])
+                    assigned.forEach(({a:b, col:bc}) => {
+                      if (b.id === a.id) return
+                      const bS = timeToMin(b.ora_inizio?.slice(0,5)||'09:00')
+                      const bE = timeToMin(b.ora_fine?.slice(0,5)||'10:00')
+                      if (aS < bE && aE > bS) overlappingCols.add(bc)
+                    })
+                    const nCols = overlappingCols.size
+                    const top = (aS - H_START*60)/60*48
+                    const ht = Math.max((aE-aS)/60*48-2, 18)
+                    const dayW = `(100% - 48px)/5`
+                    const left = `calc(48px + ${dayIdx}*(100% - 48px)/5 + ${col}*(${dayW})/${nCols} + 1px)`
+                    const width = `calc((${dayW})/${nCols} - 2px)`
+
                     return (
                       <div key={a.id} style={{
                         position:'absolute', top, height:ht,
-                        left: leftOffset,
-                        width: `calc((100% - 48px)/${5 * Math.min(totalCols, MAX_VISIBLE)} - 2px)`,
-                        background:TIPO_COLOR[a.tipo]||'#D3D1C7', color:TIPO_TEXT[a.tipo]||'#444',
-                        borderRadius:4, padding:'2px 5px', fontSize:11, cursor:'pointer', overflow:'hidden', zIndex:2+colIdx,
+                        left, width,
+                        background:TIPO_COLOR[a.tipo]||'#D3D1C7',
+                        color:TIPO_TEXT[a.tipo]||'#444',
+                        borderRadius:4, padding:'2px 5px', fontSize:11,
+                        cursor:'pointer', overflow:'hidden', zIndex:2+col,
+                        boxSizing:'border-box',
                       }} onClick={e=>{e.stopPropagation();setSelectedAppt(a);setShowDetail(true)}}>
                         <div style={{fontWeight:600,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
                           {a.candidati?`${a.candidati.nome} ${a.candidati.cognome}`:a.titolo}
                         </div>
                         {ht>28&&<div style={{opacity:.9,fontSize:10}}>{a.ora_inizio?.slice(0,5)}–{a.ora_fine?.slice(0,5)}</div>}
-                        {ht>42&&<div style={{opacity:.85,fontSize:10}}>{a.sala}</div>}
-                        {ht>56&&a.profiles&&<div style={{opacity:.85,fontSize:10}}>{a.profiles.nome} {a.profiles.cognome}</div>}
-                        {isLast && extraCount > 0 && (
-                          <div style={{position:'absolute',bottom:2,right:3,background:'rgba(0,0,0,0.2)',borderRadius:4,padding:'1px 4px',fontSize:10,fontWeight:600}}>
-                            +{extraCount}
-                          </div>
-                        )}
+                        {ht>42&&<div style={{opacity:.85,fontSize:10,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.sala}</div>}
+                        {ht>56&&a.profiles&&<div style={{opacity:.85,fontSize:10,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.profiles.nome} {a.profiles.cognome}</div>}
                       </div>
                     )
                   })
@@ -622,4 +632,3 @@ const s = {
   btnSecondary:{background:'#fff',color:'#333',border:'0.5px solid #d8d5ce',borderRadius:8,padding:'7px 14px',fontSize:13,cursor:'pointer'},
   btnSmall:{background:'#fff',border:'0.5px solid #d8d5ce',borderRadius:6,padding:'4px 10px',fontSize:12,cursor:'pointer',color:'#333'},
 }
- 
