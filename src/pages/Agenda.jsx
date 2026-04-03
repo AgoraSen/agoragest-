@@ -296,48 +296,51 @@ export default function Agenda() {
                   const dayAppts = appuntamenti.filter(a => a.data === dateStr)
                   if (!dayAppts.length) return null
 
-                  // Calcola gruppi sovrapposti e assegna colonne
-                  const assigned = [] // { appt, col, totalCols }
-                  const columns = [] // ogni colonna è array di appuntamenti
-
-                  dayAppts.forEach(a => {
-                    const aS = timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
-                    const aE = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
-                    let placed = false
-                    for (let ci = 0; ci < columns.length; ci++) {
-                      const conflicts = columns[ci].some(b => {
-                        const bS = timeToMin(b.ora_inizio?.slice(0,5)||'09:00')
-                        const bE = timeToMin(b.ora_fine?.slice(0,5)||'10:00')
-                        return aS < bE && aE > bS
-                      })
-                      if (!conflicts) { columns[ci].push(a); assigned.push({a, col:ci}); placed = true; break }
-                    }
-                    if (!placed) { columns.push([a]); assigned.push({a, col:columns.length-1}) }
+                  // Ordina per ora inizio poi per durata decrescente
+                  const sorted = [...dayAppts].sort((a,b) => {
+                    const as = timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
+                    const bs = timeToMin(b.ora_inizio?.slice(0,5)||'09:00')
+                    return as - bs
                   })
 
-                  // Per ogni appuntamento calcola quante colonne occupa il suo gruppo
-                  return assigned.map(({a, col}) => {
+                  // Assegna colonne greedy
+                  const colEnd = [] // ora fine dell'ultimo evento in ogni colonna
+                  const apptCol = new Map() // appt.id -> colIdx
+
+                  sorted.forEach(a => {
                     const aS = timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
-                    const aE = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
-                    // Trova tutte le colonne che si sovrappongono con questo appuntamento
-                    const overlappingCols = new Set([col])
-                    assigned.forEach(({a:b, col:bc}) => {
-                      if (b.id === a.id) return
-                      const bS = timeToMin(b.ora_inizio?.slice(0,5)||'09:00')
-                      const bE = timeToMin(b.ora_fine?.slice(0,5)||'10:00')
-                      if (aS < bE && aE > bS) overlappingCols.add(bc)
-                    })
-                    const nCols = overlappingCols.size
-                    const top = (aS - H_START*60)/60*48
-                    const ht = Math.max((aE-aS)/60*48-2, 18)
-                    const dayW = `(100% - 48px)/5`
-                    const left = `calc(48px + ${dayIdx}*(100% - 48px)/5 + ${col}*(${dayW})/${nCols} + 1px)`
-                    const width = `calc((${dayW})/${nCols} - 2px)`
+                    let placed = false
+                    for (let ci = 0; ci < colEnd.length; ci++) {
+                      if (aS >= colEnd[ci]) {
+                        apptCol.set(a.id, ci)
+                        colEnd[ci] = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
+                        placed = true; break
+                      }
+                    }
+                    if (!placed) {
+                      apptCol.set(a.id, colEnd.length)
+                      colEnd.push(timeToMin(a.ora_fine?.slice(0,5)||'10:00'))
+                    }
+                  })
+
+                  const totalCols = colEnd.length
+
+                  return sorted.map(a => {
+                    const col = apptCol.get(a.id) ?? 0
+                    const sMin = timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
+                    const eMin = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
+                    const top = (sMin - H_START*60)/60*48
+                    const ht = Math.max((eMin-sMin)/60*48-2, 18)
+                    const pct = 100/5 // percentuale larghezza colonna giorno
+                    const colW = pct/totalCols
 
                     return (
                       <div key={a.id} style={{
-                        position:'absolute', top, height:ht,
-                        left, width,
+                        position:'absolute',
+                        top,
+                        height:ht,
+                        left:`calc(48px + ${dayIdx * pct}% * (100% - 48px)/100 + ${col * colW}% * (100% - 48px)/100 + 1px)`,
+                        width:`calc(${colW}% * (100% - 48px)/100 - 2px)`,
                         background:TIPO_COLOR[a.tipo]||'#D3D1C7',
                         color:TIPO_TEXT[a.tipo]||'#444',
                         borderRadius:4, padding:'2px 5px', fontSize:11,
