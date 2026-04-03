@@ -10,6 +10,7 @@ import Agenda from './pages/Agenda'
 import Comunicazioni from './pages/Comunicazioni'
 import Impostazioni from './pages/Impostazioni'
 import Aziende from './pages/Aziende'
+import Automazioni from './pages/Automazioni'
 
 // Placeholder pages (da sviluppare — usano i widget già costruiti come base)
 function PlaceholderPage({ title }) {
@@ -42,7 +43,7 @@ function AppInner() {
       case 'agenda': return <Agenda />
       case 'corsi': return <PlaceholderPage title="Corsi" />
       case 'comunicazioni': return <Comunicazioni />
-      case 'automazioni': return <PlaceholderPage title="Automazioni" />
+      case 'automazioni': return <Automazioni />
       case 'impostazioni': return <Impostazioni />
       case 'aziende': return <Aziende />
       default: return <Dashboard onNavigate={setPage} />
