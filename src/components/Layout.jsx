@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 const NAV = [
   { id: 'dashboard', label: 'Dashboard', icon: '◈' },
   { id: 'candidati', label: 'Candidati', icon: '◉' },
+  { id: 'aziende', label: 'Aziende', icon: '🏢' },
   { id: 'agenda', label: 'Agenda', icon: '◷' },
   { id: 'corsi', label: 'Corsi', icon: '◫' },
   { id: 'comunicazioni', label: 'Comunicazioni', icon: '◻' },
