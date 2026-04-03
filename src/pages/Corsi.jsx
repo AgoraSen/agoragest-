@@ -71,15 +71,24 @@ export default function Corsi() {
 
   async function saveCorso() {
     if (!form.nome) return
-    if (editId) {
-      await supabase.from('corsi').update({...form,updated_at:new Date().toISOString()}).eq('id',editId)
-    } else {
-      await supabase.from('corsi').insert([form])
-    }
-    setShowModal(false); loadCorsi()
-    if (editId && selected?.id===editId) {
-      const { data } = await supabase.from('corsi').select('*').eq('id',editId).single()
-      setSelected(data)
+    try {
+      if (editId) {
+        const { error } = await supabase.from('corsi').update({...form,updated_at:new Date().toISOString()}).eq('id',editId)
+        if (error) { alert('Errore: '+error.message); return }
+      } else {
+        const { error } = await supabase.from('corsi').insert([form])
+        if (error) { alert('Errore: '+error.message); return }
+      }
+      setShowModal(false)
+      setEditId(null)
+      setForm({})
+      await loadCorsi()
+      if (editId && selected?.id===editId) {
+        const { data } = await supabase.from('corsi').select('*').eq('id',editId).single()
+        if (data) setSelected(data)
+      }
+    } catch(e) {
+      alert('Errore imprevisto: '+e.message)
     }
   }
 
@@ -231,6 +240,7 @@ export default function Corsi() {
                 </div>
                 <div style={{fontSize:14,fontWeight:600,color:'#1a1a1a',marginBottom:2}}>{c.nome}</div>
                 <div style={{fontSize:12,color:'#888'}}>
+                  {c.codice&&<span style={{marginRight:6,fontFamily:'monospace'}}>{c.codice} ·</span>}
                   {c.data_inizio&&fmtIt(c.data_inizio)}{c.data_fine&&` → ${fmtIt(c.data_fine)}`}
                   {c.sede&&<span style={{marginLeft:6}}>· {c.sede}</span>}
                 </div>
@@ -281,7 +291,7 @@ export default function Corsi() {
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
                   <div style={s.card}>
                     <div style={s.cardTitle}>Dati generali</div>
-                    {[['Nome',selected.nome],['Tipo',TIPI[selected.tipo]],['Stato',STATI[selected.stato]],['Sede',selected.sede],['Ore totali',selected.ore_totali?selected.ore_totali+'h':null],['Max partecipanti',selected.max_partecipanti]].map(([l,v])=>v&&(
+                    {[['Codice',selected.codice],['Nome',selected.nome],['Tipo',TIPI[selected.tipo]],['Stato',STATI[selected.stato]],['Sede',selected.sede],['Ore totali',selected.ore_totali?selected.ore_totali+'h':null],['Max partecipanti',selected.max_partecipanti]].map(([l,v])=>v&&(
                       <div key={l} style={s.infoRow}><span style={s.infoLabel}>{l}</span><span>{v}</span></div>
                     ))}
                   </div>
@@ -435,6 +445,9 @@ export default function Corsi() {
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
               <div style={{...s.field,gridColumn:'1/-1'}}><label style={s.label}>Nome corso *</label>
                 <input style={s.input} value={form.nome||''} onChange={e=>setForm(f=>({...f,nome:e.target.value}))}/>
+              </div>
+              <div style={s.field}><label style={s.label}>Codice corso</label>
+                <input style={s.input} value={form.codice||''} onChange={e=>setForm(f=>({...f,codice:e.target.value}))} placeholder="Es. GOL-2026-001"/>
               </div>
               <div style={s.field}><label style={s.label}>Tipo</label>
                 <select style={s.input} value={form.tipo||'interno'} onChange={e=>setForm(f=>({...f,tipo:e.target.value}))}>
