@@ -127,39 +127,36 @@ export default function Aziende() {
       ['Nome','Sì','Testo libero'],
       ['Settore','No','Industria, Commercio, Servizi, Agricoltura, Edilizia, Sanità, Istruzione, Tecnologia, Logistica, Turismo, Altro'],
       ['Tipo','No','assunzione, tirocinio, entrambe (default: assunzione)'],
-      ['P.IVA','No','Testo'],
-      ['Codice Fiscale','No','Testo'],
-      ['Indirizzo','No','Testo'],
-      ['Città','No','Testo'],
-      ['Telefono','No','Testo'],
-      ['Email','No','Indirizzo email'],
-      ['Sito web','No','URL'],
-      ['Note','No','Testo libero'],
+      ['P.IVA','No','Testo'],['Codice Fiscale','No','Testo'],
+      ['Indirizzo','No','Testo'],['Città','No','Testo'],
+      ['Telefono','No','Testo'],['Email','No','Indirizzo email'],
+      ['Sito web','No','URL'],['Note','No','Testo libero'],
     ])
     wsLeg['!cols'] = [{wch:18},{wch:12},{wch:70}]
     XLSX.utils.book_append_sheet(wb, wsLeg, 'Legenda')
-    XLSX.writeFile(wb, 'template_aziende.xlsx')
+    const buf = XLSX.write(wb, {bookType:'xlsx', type:'array'})
+    const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href=url; a.download='template_aziende.xlsx'; a.click()
+    URL.revokeObjectURL(url)
   }
 
   function exportExcel() {
     const rows = filtered.map(a => ({
-      'Nome': a.nome||'',
-      'Settore': a.settore||'',
-      'Tipo': TIPI[a.tipo]||a.tipo||'',
-      'P.IVA': a.piva||'',
-      'Codice Fiscale': a.cf||'',
-      'Indirizzo': a.indirizzo||'',
-      'Città': a.citta||'',
-      'Telefono': a.telefono||'',
-      'Email': a.email||'',
-      'Sito web': a.sito||'',
-      'Note': a.note||'',
+      'Nome': a.nome||'', 'Settore': a.settore||'', 'Tipo': TIPI[a.tipo]||a.tipo||'',
+      'P.IVA': a.piva||'', 'Codice Fiscale': a.cf||'', 'Indirizzo': a.indirizzo||'',
+      'Città': a.citta||'', 'Telefono': a.telefono||'', 'Email': a.email||'',
+      'Sito web': a.sito||'', 'Note': a.note||'',
     }))
     const wb = XLSX.utils.book_new()
     const ws = XLSX.utils.json_to_sheet(rows)
     ws['!cols'] = [25,15,15,15,15,25,15,15,25,25,30].map(w=>({wch:w}))
     XLSX.utils.book_append_sheet(wb, ws, 'Aziende')
-    XLSX.writeFile(wb, `aziende_${new Date().toISOString().slice(0,10)}.xlsx`)
+    const buf = XLSX.write(wb, {bookType:'xlsx', type:'array'})
+    const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href=url; a.download=`aziende_${new Date().toISOString().slice(0,10)}.xlsx`; a.click()
+    URL.revokeObjectURL(url)
   }
 
   function exportCsv() {
