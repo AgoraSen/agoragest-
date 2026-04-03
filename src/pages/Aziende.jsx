@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import { utils, write } from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -112,51 +111,35 @@ export default function Aziende() {
 
   function fmtIt(s) { if(!s)return '—'; const[y,m,d]=s.split('-'); return `${d}/${m}/${y}` }
 
-  function downloadExcelBlob(wb, filename) {
-    const buf = write(wb, {bookType:'xlsx', type:'array'})
-    const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})
+  function downloadExcelBlob(rows, headers, filename) {
+    // CSV con BOM UTF-8 e separatore ; — apre correttamente in Excel italiano
+    const bom = '\uFEFF'
+    const header = headers.join(';')
+    const body = rows.map(r => headers.map(h => `"${(r[h]||'').replace(/"/g,'""')}"`).join(';')).join('\n')
+    const blob = new Blob([bom + header + '\n' + body], {type:'text/csv;charset=utf-8'})
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a)
     setTimeout(()=>URL.revokeObjectURL(url), 1000)
   }
 
   function downloadTemplate() {
-    const wb = utils.book_new()
-    const wsData = [
-      ['Nome *','Settore','Tipo','P.IVA','Codice Fiscale','Indirizzo','Città','Telefono','Email','Sito web','Note'],
-      ['Azienda Esempio Srl','Industria','assunzione','01234567890','01234567890','Via Roma 1','Bologna','051123456','info@esempio.it','www.esempio.it','Note varie'],
-      ['Seconda Azienda Spa','Commercio','tirocinio','09876543210','','Via Milano 5','Roma','06987654','info@seconda.it','',''],
+    const headers = ['Nome *','Settore','Tipo','P.IVA','Codice Fiscale','Indirizzo','Città','Telefono','Email','Sito web','Note']
+    const examples = [
+      {'Nome *':'Azienda Esempio Srl','Settore':'Industria','Tipo':'assunzione','P.IVA':'01234567890','Codice Fiscale':'01234567890','Indirizzo':'Via Roma 1','Città':'Bologna','Telefono':'051123456','Email':'info@esempio.it','Sito web':'www.esempio.it','Note':'Note varie'},
+      {'Nome *':'Seconda Azienda Spa','Settore':'Commercio','Tipo':'tirocinio','P.IVA':'09876543210','Codice Fiscale':'','Indirizzo':'Via Milano 5','Città':'Roma','Telefono':'06987654','Email':'info@seconda.it','Sito web':'','Note':''},
     ]
-    const ws = utils.aoa_to_sheet(wsData)
-    ws['!cols'] = [25,15,15,15,15,25,15,15,25,25,30].map(w=>({wch:w}))
-    utils.book_append_sheet(wb, ws, 'Aziende')
-    const wsLeg = utils.aoa_to_sheet([
-      ['Campo','Obbligatorio','Valori accettati'],
-      ['Nome','Sì','Testo libero'],
-      ['Settore','No','Industria, Commercio, Servizi, Agricoltura, Edilizia, Sanità, Istruzione, Tecnologia, Logistica, Turismo, Altro'],
-      ['Tipo','No','assunzione, tirocinio, entrambe (default: assunzione)'],
-      ['P.IVA','No','Testo'],['Codice Fiscale','No','Testo'],
-      ['Indirizzo','No','Testo'],['Città','No','Testo'],
-      ['Telefono','No','Testo'],['Email','No','Indirizzo email'],
-      ['Sito web','No','URL'],['Note','No','Testo libero'],
-    ])
-    wsLeg['!cols'] = [{wch:18},{wch:12},{wch:70}]
-    utils.book_append_sheet(wb, wsLeg, 'Legenda')
-    downloadExcelBlob(wb, 'template_aziende.xlsx')
+    downloadExcelBlob(examples, headers, 'template_aziende.csv')
   }
 
   function exportExcel() {
+    const headers = ['Nome','Settore','Tipo','P.IVA','Codice Fiscale','Indirizzo','Città','Telefono','Email','Sito web','Note']
     const rows = filtered.map(a => ({
       'Nome': a.nome||'', 'Settore': a.settore||'', 'Tipo': TIPI[a.tipo]||a.tipo||'',
       'P.IVA': a.piva||'', 'Codice Fiscale': a.cf||'', 'Indirizzo': a.indirizzo||'',
       'Città': a.citta||'', 'Telefono': a.telefono||'', 'Email': a.email||'',
       'Sito web': a.sito||'', 'Note': a.note||'',
     }))
-    const wb = utils.book_new()
-    const ws = utils.json_to_sheet(rows)
-    ws['!cols'] = [25,15,15,15,15,25,15,15,25,25,30].map(w=>({wch:w}))
-    utils.book_append_sheet(wb, ws, 'Aziende')
-    downloadExcelBlob(wb, `aziende_${new Date().toISOString().slice(0,10)}.xlsx`)
+    downloadExcelBlob(rows, headers, `aziende_${new Date().toISOString().slice(0,10)}.csv`)
   }
 
   function exportCsv() {
@@ -193,13 +176,20 @@ export default function Aziende() {
     if (ext === 'xlsx' || ext === 'xls') {
       const reader = new FileReader()
       reader.onload = e => {
-        const { read } = require('xlsx')
-        const wb2 = read(e.target.result, {type:'array'})
-        const ws2 = wb2.Sheets[wb2.SheetNames[0]]
-        const data = utils.sheet_to_json(ws2, {defval:''})
-        processImportRows(data)
+        const lines = e.target.result.split('\n').filter(l=>l.trim())
+        if (lines.length < 2) { alert('File vuoto.'); return }
+        const sep = lines[0].includes(';') ? ';' : ','
+        const header = lines[0].split(sep).map(h=>h.trim().toLowerCase().replace(/["\r\ufeff]/g,''))
+        const rows = []
+        for (let i=1; i<lines.length; i++) {
+          const vals = lines[i].split(sep).map(v=>v.trim().replace(/["\r]/g,''))
+          const obj = {}
+          header.forEach((h,j) => obj[h] = vals[j]||'')
+          rows.push(obj)
+        }
+        processImportRows(rows)
       }
-      reader.readAsArrayBuffer(file)
+      reader.readAsText(file,'utf-8')
     } else {
       const reader = new FileReader()
       reader.onload = e => {
@@ -260,12 +250,12 @@ export default function Aziende() {
       <div style={s.topbar}>
         <h2 style={s.title}>Anagrafica Aziende</h2>
         <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-          <button style={s.btnSecondary} onClick={downloadTemplate}>↓ Template Excel</button>
+          <button style={s.btnSecondary} onClick={downloadTemplate}>↓ Template CSV</button>
           <label style={{...s.btnSecondary,cursor:'pointer'}}>
-            ↑ Importa (Excel/CSV)
-            <input type="file" accept=".csv,.xlsx,.xls,.txt" style={{display:'none'}} onChange={e=>handleImportFile(e.target.files[0])}/>
+            ↑ Importa CSV
+            <input type="file" accept=".csv,.txt" style={{display:'none'}} onChange={e=>handleImportFile(e.target.files[0])}/>
           </label>
-          <button style={s.btnSecondary} onClick={exportExcel}>↓ Excel</button>
+          <button style={s.btnSecondary} onClick={exportExcel}>↓ CSV (Excel)</button>
           <button style={s.btnSecondary} onClick={exportCsv}>↓ CSV</button>
           <button style={s.btnSecondary} onClick={exportPdf}>↓ PDF</button>
           <button style={s.btnPrimary} onClick={()=>{setEditId(null);setForm({tipo:'assunzione'});setShowModal(true)}}>+ Nuova azienda</button>
