@@ -88,6 +88,20 @@ export default function Automazioni() {
     setRunning(null)
   }
 
+  async function sendEmailReale(to, subject, html) {
+    try {
+      const res = await fetch('/.netlify/functions/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to, subject, html })
+      })
+      return res.ok
+    } catch(e) {
+      console.error('Errore invio email:', e)
+      return false
+    }
+  }
+
   async function eseguiRegola(regola) {
     const oggi = new Date().toISOString().slice(0,10)
     const domani = new Date(Date.now()+86400000).toISOString().slice(0,10)
@@ -110,10 +124,19 @@ export default function Automazioni() {
         const testo = (tpl?.testo||`Gentile {{nome}}, ricordiamo l'appuntamento di domani alle ${a.ora_inizio?.slice(0,5)} presso ${a.sala}.`)
           .replace(/{{nome}}/g, a.candidati.nome).replace(/{{cognome}}/g, a.candidati.cognome)
           .replace(/{{ora_appuntamento}}/g, a.ora_inizio?.slice(0,5)||'').replace(/{{sala}}/g, a.sala||'')
+        let statoInvio = 'Inviato (simulato)'
+        if ((regola.canale==='email'||regola.canale==='entrambi') && a.candidati.email) {
+          const ok = await sendEmailReale(
+            a.candidati.email,
+            `Promemoria appuntamento — ${domani}`,
+            `<p>${testo.replace(/\n/g,'<br>')}</p><br><p><small>Agorà Società Cooperativa</small></p>`
+          )
+          statoInvio = ok ? 'Inviato' : 'Errore invio'
+        }
         await supabase.from('log_invii').insert([{
           candidato_id: a.candidati.id, candidato_nome: `${a.candidati.nome} ${a.candidati.cognome}`,
           candidato_cf: a.candidati.cf, template_nome: regola.nome, canale: regola.canale||'sms',
-          testo, stato: 'Inviato (simulato)', operatore_id: profile.id,
+          testo, stato: statoInvio, operatore_id: profile.id,
           operatore_nome: `${profile.nome} ${profile.cognome}`, trigger_tipo: 'automazione',
         }])
         count++
