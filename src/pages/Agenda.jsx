@@ -124,7 +124,13 @@ export default function Agenda() {
     return Array.from({length:5}, (_,i) => { const r = new Date(d); r.setDate(d.getDate()+i); return r })
   }
 
-  function fmtDate(d) { return d instanceof Date ? d.toISOString().slice(0,10) : d }
+  function fmtDate(d) {
+    if (!(d instanceof Date)) return d
+    const y = d.getFullYear()
+    const m = String(d.getMonth()+1).padStart(2,'0')
+    const dd = String(d.getDate()).padStart(2,'0')
+    return `${y}-${m}-${dd}`
+  }
   function fmtShort(d) { return d.toLocaleDateString('it-IT',{day:'numeric',month:'short'}) }
   function fmtIt(s) { if(!s)return '—'; const[y,m,dd]=s.split('-'); return `${dd}/${m}/${y}` }
   function isToday(d) { return fmtDate(d) === fmtDate(new Date()) }
