@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import * as XLSX from 'xlsx'
+import { utils, write } from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -112,17 +112,25 @@ export default function Aziende() {
 
   function fmtIt(s) { if(!s)return '—'; const[y,m,d]=s.split('-'); return `${d}/${m}/${y}` }
 
+  function downloadExcelBlob(wb, filename) {
+    const buf = write(wb, {bookType:'xlsx', type:'array'})
+    const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a)
+    setTimeout(()=>URL.revokeObjectURL(url), 1000)
+  }
+
   function downloadTemplate() {
-    const wb = XLSX.utils.book_new()
+    const wb = utils.book_new()
     const wsData = [
       ['Nome *','Settore','Tipo','P.IVA','Codice Fiscale','Indirizzo','Città','Telefono','Email','Sito web','Note'],
       ['Azienda Esempio Srl','Industria','assunzione','01234567890','01234567890','Via Roma 1','Bologna','051123456','info@esempio.it','www.esempio.it','Note varie'],
       ['Seconda Azienda Spa','Commercio','tirocinio','09876543210','','Via Milano 5','Roma','06987654','info@seconda.it','',''],
     ]
-    const ws = XLSX.utils.aoa_to_sheet(wsData)
+    const ws = utils.aoa_to_sheet(wsData)
     ws['!cols'] = [25,15,15,15,15,25,15,15,25,25,30].map(w=>({wch:w}))
-    XLSX.utils.book_append_sheet(wb, ws, 'Aziende')
-    const wsLeg = XLSX.utils.aoa_to_sheet([
+    utils.book_append_sheet(wb, ws, 'Aziende')
+    const wsLeg = utils.aoa_to_sheet([
       ['Campo','Obbligatorio','Valori accettati'],
       ['Nome','Sì','Testo libero'],
       ['Settore','No','Industria, Commercio, Servizi, Agricoltura, Edilizia, Sanità, Istruzione, Tecnologia, Logistica, Turismo, Altro'],
@@ -133,12 +141,8 @@ export default function Aziende() {
       ['Sito web','No','URL'],['Note','No','Testo libero'],
     ])
     wsLeg['!cols'] = [{wch:18},{wch:12},{wch:70}]
-    XLSX.utils.book_append_sheet(wb, wsLeg, 'Legenda')
-    const buf = XLSX.write(wb, {bookType:'xlsx', type:'array'})
-    const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href=url; a.download='template_aziende.xlsx'; a.click()
-    URL.revokeObjectURL(url)
+    utils.book_append_sheet(wb, wsLeg, 'Legenda')
+    downloadExcelBlob(wb, 'template_aziende.xlsx')
   }
 
   function exportExcel() {
@@ -148,15 +152,11 @@ export default function Aziende() {
       'Città': a.citta||'', 'Telefono': a.telefono||'', 'Email': a.email||'',
       'Sito web': a.sito||'', 'Note': a.note||'',
     }))
-    const wb = XLSX.utils.book_new()
-    const ws = XLSX.utils.json_to_sheet(rows)
+    const wb = utils.book_new()
+    const ws = utils.json_to_sheet(rows)
     ws['!cols'] = [25,15,15,15,15,25,15,15,25,25,30].map(w=>({wch:w}))
-    XLSX.utils.book_append_sheet(wb, ws, 'Aziende')
-    const buf = XLSX.write(wb, {bookType:'xlsx', type:'array'})
-    const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href=url; a.download=`aziende_${new Date().toISOString().slice(0,10)}.xlsx`; a.click()
-    URL.revokeObjectURL(url)
+    utils.book_append_sheet(wb, ws, 'Aziende')
+    downloadExcelBlob(wb, `aziende_${new Date().toISOString().slice(0,10)}.xlsx`)
   }
 
   function exportCsv() {
@@ -193,9 +193,10 @@ export default function Aziende() {
     if (ext === 'xlsx' || ext === 'xls') {
       const reader = new FileReader()
       reader.onload = e => {
-        const wb = XLSX.read(e.target.result, {type:'array'})
-        const ws = wb.Sheets[wb.SheetNames[0]]
-        const data = XLSX.utils.sheet_to_json(ws, {defval:''})
+        const { read } = require('xlsx')
+        const wb2 = read(e.target.result, {type:'array'})
+        const ws2 = wb2.Sheets[wb2.SheetNames[0]]
+        const data = utils.sheet_to_json(ws2, {defval:''})
         processImportRows(data)
       }
       reader.readAsArrayBuffer(file)
