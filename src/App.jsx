@@ -11,6 +11,7 @@ import Comunicazioni from './pages/Comunicazioni'
 import Impostazioni from './pages/Impostazioni'
 import Aziende from './pages/Aziende'
 import Automazioni from './pages/Automazioni'
+import Corsi from './pages/Corsi'
 
 // Placeholder pages (da sviluppare — usano i widget già costruiti come base)
 function PlaceholderPage({ title }) {
@@ -41,7 +42,7 @@ function AppInner() {
       case 'candidati': return <Candidati />
       case 'utenti': return <Utenti />
       case 'agenda': return <Agenda />
-      case 'corsi': return <PlaceholderPage title="Corsi" />
+      case 'corsi': return <Corsi />
       case 'comunicazioni': return <Comunicazioni />
       case 'automazioni': return <Automazioni />
       case 'impostazioni': return <Impostazioni />
