@@ -114,28 +114,29 @@ export default function Aziende() {
 
   function downloadTemplate() {
     const wb = XLSX.utils.book_new()
-    // Foglio dati aziende
     const wsData = [
       ['Nome *','Settore','Tipo','P.IVA','Codice Fiscale','Indirizzo','Città','Telefono','Email','Sito web','Note'],
       ['Azienda Esempio Srl','Industria','assunzione','01234567890','01234567890','Via Roma 1','Bologna','051123456','info@esempio.it','www.esempio.it','Note varie'],
+      ['Seconda Azienda Spa','Commercio','tirocinio','09876543210','','Via Milano 5','Roma','06987654','info@seconda.it','',''],
     ]
     const ws = XLSX.utils.aoa_to_sheet(wsData)
-    ws['!cols'] = [20,15,15,15,15,25,15,15,25,25,30].map(w=>({wch:w}))
-    // Stile intestazioni
-    const range = XLSX.utils.decode_range(ws['!ref'])
-    for (let C=range.s.c; C<=range.e.c; C++) {
-      const cell = ws[XLSX.utils.encode_cell({r:0,c:C})]
-      if (cell) cell.s = {font:{bold:true},fill:{fgColor:{rgb:'1a3a5c'}}}
-    }
+    ws['!cols'] = [25,15,15,15,15,25,15,15,25,25,30].map(w=>({wch:w}))
     XLSX.utils.book_append_sheet(wb, ws, 'Aziende')
-    // Foglio legenda
     const wsLeg = XLSX.utils.aoa_to_sheet([
-      ['Campo','Valori accettati','Note'],
-      ['Tipo','assunzione / tirocinio / entrambe','Se lasciato vuoto usa "assunzione"'],
-      ['Settore','Industria, Commercio, Servizi, Agricoltura, Edilizia, Sanità, Istruzione, Tecnologia, Logistica, Turismo, Altro',''],
-      ['Nome *','Testo libero','Campo obbligatorio'],
+      ['Campo','Obbligatorio','Valori accettati'],
+      ['Nome','Sì','Testo libero'],
+      ['Settore','No','Industria, Commercio, Servizi, Agricoltura, Edilizia, Sanità, Istruzione, Tecnologia, Logistica, Turismo, Altro'],
+      ['Tipo','No','assunzione, tirocinio, entrambe (default: assunzione)'],
+      ['P.IVA','No','Testo'],
+      ['Codice Fiscale','No','Testo'],
+      ['Indirizzo','No','Testo'],
+      ['Città','No','Testo'],
+      ['Telefono','No','Testo'],
+      ['Email','No','Indirizzo email'],
+      ['Sito web','No','URL'],
+      ['Note','No','Testo libero'],
     ])
-    wsLeg['!cols'] = [{wch:15},{wch:60},{wch:40}]
+    wsLeg['!cols'] = [{wch:18},{wch:12},{wch:70}]
     XLSX.utils.book_append_sheet(wb, wsLeg, 'Legenda')
     XLSX.writeFile(wb, 'template_aziende.xlsx')
   }
