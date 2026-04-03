@@ -21,6 +21,10 @@ export default function Candidati() {
   const [page, setPage] = useState(0)
   const [q, setQ] = useState('')
   const [filterStato, setFilterStato] = useState('')
+  const [filterPercorso, setFilterPercorso] = useState('')
+  const [filterReferente, setFilterReferente] = useState('')
+  const [sortField, setSortField] = useState('cognome')
+  const [sortDir, setSortDir] = useState('asc')
   const [selected, setSelected] = useState(null)
   const [colloqui, setColloqui] = useState([])
   const [apptFuturi, setApptFuturi] = useState([])
@@ -35,13 +39,26 @@ export default function Candidati() {
 
   useEffect(() => {
     const lower = q.toLowerCase()
-    const f = candidati.filter(c =>
+    let f = candidati.filter(c =>
       (!lower || (c.nome + c.cognome + (c.cf||'') + (c.email||'')).toLowerCase().includes(lower)) &&
-      (!filterStato || c.stato === filterStato)
+      (!filterStato || c.stato === filterStato) &&
+      (!filterPercorso || (c.percorso||'').includes(filterPercorso)) &&
+      (!filterReferente || c.referente_id === filterReferente)
     )
+    // Ordinamento
+    f = [...f].sort((a, b) => {
+      let va, vb
+      if (sortField === 'nome') { va = `${a.cognome} ${a.nome}`; vb = `${b.cognome} ${b.nome}` }
+      else if (sortField === 'stato') { va = a.stato||''; vb = b.stato||'' }
+      else if (sortField === 'percorso') { va = a.percorso||''; vb = b.percorso||'' }
+      else if (sortField === 'referente') { va = a.profiles?`${a.profiles.cognome}`:''; vb = b.profiles?`${b.profiles.cognome}`:'' }
+      else if (sortField === 'comune') { va = a.comune||''; vb = b.comune||'' }
+      else { va = a[sortField]||''; vb = b[sortField]||'' }
+      return sortDir === 'asc' ? va.localeCompare(vb,'it') : vb.localeCompare(va,'it')
+    })
     setFiltered(f)
     setPage(0)
-  }, [q, filterStato, candidati])
+  }, [q, filterStato, filterPercorso, filterReferente, sortField, sortDir, candidati])
 
   async function loadProfiles() {
     const { data } = await supabase.from('profiles').select('id, nome, cognome').eq('attivo', true)
@@ -144,6 +161,17 @@ export default function Candidati() {
           <option value="">Tutti gli stati</option>
           {STATI.map(s => <option key={s}>{s}</option>)}
         </select>
+        <select style={styles.select} value={filterPercorso} onChange={e => setFilterPercorso(e.target.value)}>
+          <option value="">Tutti i percorsi</option>
+          {[...new Set(candidati.map(c=>c.percorso).filter(Boolean))].sort().map(p => <option key={p}>{p}</option>)}
+        </select>
+        <select style={styles.select} value={filterReferente} onChange={e => setFilterReferente(e.target.value)}>
+          <option value="">Tutti i referenti</option>
+          {profiles.map(p => <option key={p.id} value={p.id}>{p.nome} {p.cognome}</option>)}
+        </select>
+        {(filterStato||filterPercorso||filterReferente||q) &&
+          <button style={{...styles.pageBtn,color:'#b91c1c',fontSize:12}} onClick={()=>{setQ('');setFilterStato('');setFilterPercorso('');setFilterReferente('')}}>✕ Azzera</button>
+        }
       </div>
 
       {/* Tabella */}
@@ -154,8 +182,26 @@ export default function Candidati() {
             <table style={styles.table}>
               <thead>
                 <tr>
-                  {['', 'Nome', 'Telefono', 'Stato', 'Percorso', 'Comune', 'Referente'].map(h => (
-                    <th key={h} style={styles.th}>{h}</th>
+                  <th style={styles.th}></th>
+                  {[
+                    {label:'Nome', field:'nome'},
+                    {label:'Telefono', field:null},
+                    {label:'Stato', field:'stato'},
+                    {label:'Percorso', field:'percorso'},
+                    {label:'Comune', field:'comune'},
+                    {label:'Referente', field:'referente'},
+                  ].map(({label,field}) => (
+                    <th key={label} style={{...styles.th,cursor:field?'pointer':'default',userSelect:'none',whiteSpace:'nowrap'}}
+                      onClick={()=>{
+                        if (!field) return
+                        if (sortField===field) setSortDir(d=>d==='asc'?'desc':'asc')
+                        else { setSortField(field); setSortDir('asc') }
+                      }}>
+                      {label}
+                      {field && <span style={{marginLeft:4,color:sortField===field?'#1a3a5c':'#ccc',fontSize:10}}>
+                        {sortField===field?(sortDir==='asc'?'▲':'▼'):'⇅'}
+                      </span>}
+                    </th>
                   ))}
                 </tr>
               </thead>
