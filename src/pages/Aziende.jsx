@@ -2,6 +2,9 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import * as XLSX from 'xlsx'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 const SETTORI = ['Industria','Commercio','Servizi','Agricoltura','Edilizia','Sanità','Istruzione','Tecnologia','Logistica','Turismo','Altro']
 const TIPI = { assunzione:'Assunzione', tirocinio:'Tirocinio/Stage', entrambe:'Entrambe' }
@@ -109,49 +112,142 @@ export default function Aziende() {
 
   function fmtIt(s) { if(!s)return '—'; const[y,m,d]=s.split('-'); return `${d}/${m}/${y}` }
 
+  function downloadTemplate() {
+    const wb = XLSX.utils.book_new()
+    // Foglio dati aziende
+    const wsData = [
+      ['Nome *','Settore','Tipo','P.IVA','Codice Fiscale','Indirizzo','Città','Telefono','Email','Sito web','Note'],
+      ['Azienda Esempio Srl','Industria','assunzione','01234567890','01234567890','Via Roma 1','Bologna','051123456','info@esempio.it','www.esempio.it','Note varie'],
+    ]
+    const ws = XLSX.utils.aoa_to_sheet(wsData)
+    ws['!cols'] = [20,15,15,15,15,25,15,15,25,25,30].map(w=>({wch:w}))
+    // Stile intestazioni
+    const range = XLSX.utils.decode_range(ws['!ref'])
+    for (let C=range.s.c; C<=range.e.c; C++) {
+      const cell = ws[XLSX.utils.encode_cell({r:0,c:C})]
+      if (cell) cell.s = {font:{bold:true},fill:{fgColor:{rgb:'1a3a5c'}}}
+    }
+    XLSX.utils.book_append_sheet(wb, ws, 'Aziende')
+    // Foglio legenda
+    const wsLeg = XLSX.utils.aoa_to_sheet([
+      ['Campo','Valori accettati','Note'],
+      ['Tipo','assunzione / tirocinio / entrambe','Se lasciato vuoto usa "assunzione"'],
+      ['Settore','Industria, Commercio, Servizi, Agricoltura, Edilizia, Sanità, Istruzione, Tecnologia, Logistica, Turismo, Altro',''],
+      ['Nome *','Testo libero','Campo obbligatorio'],
+    ])
+    wsLeg['!cols'] = [{wch:15},{wch:60},{wch:40}]
+    XLSX.utils.book_append_sheet(wb, wsLeg, 'Legenda')
+    XLSX.writeFile(wb, 'template_aziende.xlsx')
+  }
+
+  function exportExcel() {
+    const rows = filtered.map(a => ({
+      'Nome': a.nome||'',
+      'Settore': a.settore||'',
+      'Tipo': TIPI[a.tipo]||a.tipo||'',
+      'P.IVA': a.piva||'',
+      'Codice Fiscale': a.cf||'',
+      'Indirizzo': a.indirizzo||'',
+      'Città': a.citta||'',
+      'Telefono': a.telefono||'',
+      'Email': a.email||'',
+      'Sito web': a.sito||'',
+      'Note': a.note||'',
+    }))
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.json_to_sheet(rows)
+    ws['!cols'] = [25,15,15,15,15,25,15,15,25,25,30].map(w=>({wch:w}))
+    XLSX.utils.book_append_sheet(wb, ws, 'Aziende')
+    XLSX.writeFile(wb, `aziende_${new Date().toISOString().slice(0,10)}.xlsx`)
+  }
+
   function exportCsv() {
     const header = 'Nome,Settore,Tipo,P.IVA,CF,Indirizzo,Città,Telefono,Email,Sito,Note'
     const rows = filtered.map(a => [a.nome,a.settore,a.tipo,a.piva,a.cf,a.indirizzo,a.citta,a.telefono,a.email,a.sito,a.note]
       .map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(','))
     const blob = new Blob([header+'\n'+rows.join('\n')],{type:'text/csv;charset=utf-8'})
-    const link = document.createElement('a'); link.href=URL.createObjectURL(blob); link.download='aziende.csv'; link.click()
+    const link = document.createElement('a'); link.href=URL.createObjectURL(blob); link.download=`aziende_${new Date().toISOString().slice(0,10)}.csv`; link.click()
   }
 
-  function exportJson() {
-    const blob = new Blob([JSON.stringify(filtered,null,2)],{type:'application/json'})
-    const link = document.createElement('a'); link.href=URL.createObjectURL(blob); link.download='aziende.json'; link.click()
-  }
-
-  function downloadTemplate() {
-    const csv = 'nome,settore,tipo,piva,cf,indirizzo,citta,telefono,email,sito,note\nAzienda Esempio,Industria,assunzione,01234567890,01234567890,Via Roma 1,Bologna,051123456,info@esempio.it,www.esempio.it,Note varie'
-    const blob = new Blob([csv],{type:'text/csv;charset=utf-8'})
-    const link = document.createElement('a'); link.href=URL.createObjectURL(blob); link.download='template_aziende.csv'; link.click()
+  function exportPdf() {
+    const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' })
+    // Intestazione
+    doc.setFontSize(16); doc.setTextColor(26,58,92)
+    doc.text('Anagrafica Aziende', 14, 16)
+    doc.setFontSize(10); doc.setTextColor(130,130,130)
+    doc.text(`Esportato il ${new Date().toLocaleDateString('it-IT')} — ${filtered.length} aziende`, 14, 22)
+    autoTable(doc, {
+      startY: 28,
+      head: [['Nome','Settore','Tipo','Città','Telefono','Email','P.IVA']],
+      body: filtered.map(a => [a.nome||'',a.settore||'',TIPI[a.tipo]||'',a.citta||'',a.telefono||'',a.email||'',a.piva||'']),
+      headStyles: { fillColor:[26,58,92], textColor:255, fontSize:9, fontStyle:'bold' },
+      bodyStyles: { fontSize:8 },
+      alternateRowStyles: { fillColor:[245,244,240] },
+      columnStyles: { 0:{cellWidth:50}, 1:{cellWidth:25}, 2:{cellWidth:25}, 3:{cellWidth:25}, 4:{cellWidth:25}, 5:{cellWidth:50}, 6:{cellWidth:30} },
+      margin: { left:14, right:14 },
+    })
+    doc.save(`aziende_${new Date().toISOString().slice(0,10)}.pdf`)
   }
 
   function handleImportFile(file) {
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = e => {
-      const lines = e.target.result.split('\n').filter(l=>l.trim())
-      if (lines.length < 2) { alert('File vuoto o senza dati.'); return }
-      const header = lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/["\r\ufeff]/g,''))
-      const rows = []
-      for (let i=1; i<lines.length; i++) {
-        const vals = lines[i].split(',').map(v=>v.trim().replace(/["\r]/g,''))
-        const obj = {}
-        header.forEach((h,j) => obj[h] = vals[j]||'')
-        if (obj.nome) rows.push({
-          nome:obj.nome, settore:obj.settore||null, tipo:['assunzione','tirocinio','entrambe'].includes(obj.tipo)?obj.tipo:'assunzione',
-          piva:obj.piva||null, cf:obj.cf||null, indirizzo:obj.indirizzo||null, citta:obj.citta||null,
-          telefono:obj.telefono||null, email:obj.email||null, sito:obj.sito||null, note:obj.note||null
-        })
+    const ext = file.name.split('.').pop().toLowerCase()
+    if (ext === 'xlsx' || ext === 'xls') {
+      const reader = new FileReader()
+      reader.onload = e => {
+        const wb = XLSX.read(e.target.result, {type:'array'})
+        const ws = wb.Sheets[wb.SheetNames[0]]
+        const data = XLSX.utils.sheet_to_json(ws, {defval:''})
+        processImportRows(data)
       }
-      if (rows.length === 0) { alert('Nessuna azienda valida trovata.'); return }
-      if (window.confirm(`Importare ${rows.length} aziende?`)) {
-        supabase.from('aziende').insert(rows).then(()=>{ loadAziende(); alert(`${rows.length} aziende importate!`) })
+      reader.readAsArrayBuffer(file)
+    } else {
+      const reader = new FileReader()
+      reader.onload = e => {
+        const lines = e.target.result.split('\n').filter(l=>l.trim())
+        if (lines.length < 2) { alert('File vuoto.'); return }
+        const header = lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/["\r\ufeff]/g,''))
+        const rows = []
+        for (let i=1; i<lines.length; i++) {
+          const vals = lines[i].split(',').map(v=>v.trim().replace(/["\r]/g,''))
+          const obj = {}
+          header.forEach((h,j) => obj[h] = vals[j]||'')
+          rows.push(obj)
+        }
+        processImportRows(rows)
       }
+      reader.readAsText(file,'utf-8')
     }
-    reader.readAsText(file,'utf-8')
+  }
+
+  function processImportRows(data) {
+    const rows = data
+      .map(obj => {
+        // Normalizza chiavi (accetta sia italiano che inglese)
+        const get = (...keys) => { for (const k of keys) { const v = obj[k]||obj[k.toLowerCase()]||obj[k.charAt(0).toUpperCase()+k.slice(1)]; if(v) return String(v).trim() } return null }
+        const nome = get('nome','name','ragione sociale','ragione_sociale')
+        if (!nome) return null
+        return {
+          nome, settore:get('settore','sector')||null,
+          tipo:['assunzione','tirocinio','entrambe'].includes((get('tipo','type')||'').toLowerCase())?(get('tipo','type')||'').toLowerCase():'assunzione',
+          piva:get('piva','p.iva','partita iva','partita_iva')||null,
+          cf:get('cf','codice fiscale','codice_fiscale')||null,
+          indirizzo:get('indirizzo','address')||null,
+          citta:get('città','citta','city')||null,
+          telefono:get('telefono','tel','phone')||null,
+          email:get('email')||null,
+          sito:get('sito','sito web','website')||null,
+          note:get('note','notes')||null,
+        }
+      })
+      .filter(Boolean)
+    if (rows.length === 0) { alert('Nessuna azienda valida trovata. Controlla le colonne del file.'); return }
+    if (window.confirm(`Importare ${rows.length} aziende?`)) {
+      supabase.from('aziende').insert(rows).then(({error}) => {
+        if (error) alert('Errore: '+error.message)
+        else { loadAziende(); alert(`${rows.length} aziende importate con successo!`) }
+      })
+    }
   }
 
   const filtered = aziende.filter(a =>
@@ -165,13 +261,14 @@ export default function Aziende() {
       <div style={s.topbar}>
         <h2 style={s.title}>Anagrafica Aziende</h2>
         <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-          <button style={s.btnSecondary} onClick={downloadTemplate}>↓ Template CSV</button>
+          <button style={s.btnSecondary} onClick={downloadTemplate}>↓ Template Excel</button>
           <label style={{...s.btnSecondary,cursor:'pointer'}}>
-            ↑ Importa CSV
-            <input type="file" accept=".csv,.txt" style={{display:'none'}} onChange={e=>handleImportFile(e.target.files[0])}/>
+            ↑ Importa (Excel/CSV)
+            <input type="file" accept=".csv,.xlsx,.xls,.txt" style={{display:'none'}} onChange={e=>handleImportFile(e.target.files[0])}/>
           </label>
-          <button style={s.btnSecondary} onClick={exportCsv}>↓ Esporta CSV</button>
-          <button style={s.btnSecondary} onClick={exportJson}>↓ Esporta JSON</button>
+          <button style={s.btnSecondary} onClick={exportExcel}>↓ Excel</button>
+          <button style={s.btnSecondary} onClick={exportCsv}>↓ CSV</button>
+          <button style={s.btnSecondary} onClick={exportPdf}>↓ PDF</button>
           <button style={s.btnPrimary} onClick={()=>{setEditId(null);setForm({tipo:'assunzione'});setShowModal(true)}}>+ Nuova azienda</button>
         </div>
       </div>
