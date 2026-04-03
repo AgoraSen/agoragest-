@@ -109,6 +109,51 @@ export default function Aziende() {
 
   function fmtIt(s) { if(!s)return '—'; const[y,m,d]=s.split('-'); return `${d}/${m}/${y}` }
 
+  function exportCsv() {
+    const header = 'Nome,Settore,Tipo,P.IVA,CF,Indirizzo,Città,Telefono,Email,Sito,Note'
+    const rows = filtered.map(a => [a.nome,a.settore,a.tipo,a.piva,a.cf,a.indirizzo,a.citta,a.telefono,a.email,a.sito,a.note]
+      .map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(','))
+    const blob = new Blob([header+'\n'+rows.join('\n')],{type:'text/csv;charset=utf-8'})
+    const link = document.createElement('a'); link.href=URL.createObjectURL(blob); link.download='aziende.csv'; link.click()
+  }
+
+  function exportJson() {
+    const blob = new Blob([JSON.stringify(filtered,null,2)],{type:'application/json'})
+    const link = document.createElement('a'); link.href=URL.createObjectURL(blob); link.download='aziende.json'; link.click()
+  }
+
+  function downloadTemplate() {
+    const csv = 'nome,settore,tipo,piva,cf,indirizzo,citta,telefono,email,sito,note\nAzienda Esempio,Industria,assunzione,01234567890,01234567890,Via Roma 1,Bologna,051123456,info@esempio.it,www.esempio.it,Note varie'
+    const blob = new Blob([csv],{type:'text/csv;charset=utf-8'})
+    const link = document.createElement('a'); link.href=URL.createObjectURL(blob); link.download='template_aziende.csv'; link.click()
+  }
+
+  function handleImportFile(file) {
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = e => {
+      const lines = e.target.result.split('\n').filter(l=>l.trim())
+      if (lines.length < 2) { alert('File vuoto o senza dati.'); return }
+      const header = lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/["\r\ufeff]/g,''))
+      const rows = []
+      for (let i=1; i<lines.length; i++) {
+        const vals = lines[i].split(',').map(v=>v.trim().replace(/["\r]/g,''))
+        const obj = {}
+        header.forEach((h,j) => obj[h] = vals[j]||'')
+        if (obj.nome) rows.push({
+          nome:obj.nome, settore:obj.settore||null, tipo:['assunzione','tirocinio','entrambe'].includes(obj.tipo)?obj.tipo:'assunzione',
+          piva:obj.piva||null, cf:obj.cf||null, indirizzo:obj.indirizzo||null, citta:obj.citta||null,
+          telefono:obj.telefono||null, email:obj.email||null, sito:obj.sito||null, note:obj.note||null
+        })
+      }
+      if (rows.length === 0) { alert('Nessuna azienda valida trovata.'); return }
+      if (window.confirm(`Importare ${rows.length} aziende?`)) {
+        supabase.from('aziende').insert(rows).then(()=>{ loadAziende(); alert(`${rows.length} aziende importate!`) })
+      }
+    }
+    reader.readAsText(file,'utf-8')
+  }
+
   const filtered = aziende.filter(a =>
     (!searchQ || a.nome.toLowerCase().includes(searchQ.toLowerCase()) || (a.citta||'').toLowerCase().includes(searchQ.toLowerCase())) &&
     (!filterTipo || a.tipo === filterTipo) &&
@@ -119,7 +164,16 @@ export default function Aziende() {
     <div style={s.wrap}>
       <div style={s.topbar}>
         <h2 style={s.title}>Anagrafica Aziende</h2>
-        <button style={s.btnPrimary} onClick={()=>{setEditId(null);setForm({tipo:'assunzione'});setShowModal(true)}}>+ Nuova azienda</button>
+        <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+          <button style={s.btnSecondary} onClick={downloadTemplate}>↓ Template CSV</button>
+          <label style={{...s.btnSecondary,cursor:'pointer'}}>
+            ↑ Importa CSV
+            <input type="file" accept=".csv,.txt" style={{display:'none'}} onChange={e=>handleImportFile(e.target.files[0])}/>
+          </label>
+          <button style={s.btnSecondary} onClick={exportCsv}>↓ Esporta CSV</button>
+          <button style={s.btnSecondary} onClick={exportJson}>↓ Esporta JSON</button>
+          <button style={s.btnPrimary} onClick={()=>{setEditId(null);setForm({tipo:'assunzione'});setShowModal(true)}}>+ Nuova azienda</button>
+        </div>
       </div>
 
       <div style={s.layout}>

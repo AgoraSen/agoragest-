@@ -372,6 +372,21 @@ export default function Agenda() {
     const dateStr = fmtDate(d)
     const dayAppts = appuntamenti.filter(a => a.data === dateStr)
     const sorted = [...dayAppts].sort((a,b) => timeToMin(a.ora_inizio?.slice(0,5)) - timeToMin(b.ora_inizio?.slice(0,5)))
+
+    // Affiancamento senza limite di colonne — vista giornaliera ha tutto lo spazio
+    const colEnd = []
+    const apptCol = new Map()
+    sorted.forEach(a => {
+      const aS = timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
+      const aE = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
+      let placed = false
+      for (let ci = 0; ci < colEnd.length; ci++) {
+        if (aS >= colEnd[ci]) { apptCol.set(a.id, ci); colEnd[ci] = aE; placed = true; break }
+      }
+      if (!placed) { apptCol.set(a.id, colEnd.length); colEnd.push(aE) }
+    })
+    const totalCols = Math.max(colEnd.length, 1)
+
     return (
       <div style={{...s.calOuter}}>
         <div style={{...s.cal, minWidth:300}}>
@@ -380,6 +395,7 @@ export default function Agenda() {
             <div style={{...s.dayHead,...(isToday(d)?s.dayHeadToday:{}),textAlign:'left',paddingLeft:12}}>
               <span style={{fontSize:18,fontWeight:600}}>{d.getDate()} </span>
               {d.toLocaleDateString('it-IT',{weekday:'long',month:'long',year:'numeric'})}
+              {dayAppts.length>0&&<span style={{fontSize:12,color:'#888',marginLeft:12}}>{dayAppts.length} appuntament{dayAppts.length===1?'o':'i'}</span>}
             </div>
           </div>
           <div style={{position:'relative'}}>
@@ -390,16 +406,19 @@ export default function Agenda() {
               </div>
             ))}
             {sorted.map(a => {
+              const col = apptCol.get(a.id) ?? 0
               const sMin = timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
               const eMin = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
               const top = (sMin - H_START*60)/60*48
               const ht = Math.max((eMin-sMin)/60*48-2, 24)
+              const colFrac = 1/totalCols
               return (
                 <div key={a.id} style={{
                   position:'absolute', top, height:ht,
-                  left:'calc(48px + 4px)', width:'calc(100% - 48px - 8px)',
+                  left:`calc(48px + (100% - 48px) * ${col * colFrac} + 2px)`,
+                  width:`calc((100% - 48px) * ${colFrac} - 4px)`,
                   background:TIPO_COLOR[a.tipo]||'#D3D1C7', color:TIPO_TEXT[a.tipo]||'#444',
-                  borderRadius:6, padding:'4px 10px', fontSize:12, cursor:'pointer', overflow:'hidden', zIndex:2, boxSizing:'border-box',
+                  borderRadius:6, padding:'4px 10px', fontSize:12, cursor:'pointer', overflow:'hidden', zIndex:2+col, boxSizing:'border-box',
                 }} onClick={e=>{e.stopPropagation();setSelectedAppt(a);setShowDetail(true)}}>
                   <div style={{fontWeight:600}}>{a.candidati?`${a.candidati.nome} ${a.candidati.cognome}`:a.titolo}</div>
                   {ht>24&&<div style={{fontSize:11,opacity:.9}}>{a.ora_inizio?.slice(0,5)}–{a.ora_fine?.slice(0,5)} · {a.sala}</div>}
