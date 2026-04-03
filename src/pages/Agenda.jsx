@@ -296,30 +296,28 @@ export default function Agenda() {
                   const dayAppts = appuntamenti.filter(a => a.data === dateStr)
                   if (!dayAppts.length) return null
 
-                  // Ordina per ora inizio poi per durata decrescente
-                  const sorted = [...dayAppts].sort((a,b) => {
-                    const as = timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
-                    const bs = timeToMin(b.ora_inizio?.slice(0,5)||'09:00')
-                    return as - bs
-                  })
+                  // Ordina per ora inizio
+                  const sorted = [...dayAppts].sort((a,b) =>
+                    timeToMin(a.ora_inizio?.slice(0,5)) - timeToMin(b.ora_inizio?.slice(0,5))
+                  )
 
                   // Assegna colonne greedy
-                  const colEnd = [] // ora fine dell'ultimo evento in ogni colonna
-                  const apptCol = new Map() // appt.id -> colIdx
-
+                  const colEnd = []
+                  const apptCol = new Map()
                   sorted.forEach(a => {
                     const aS = timeToMin(a.ora_inizio?.slice(0,5)||'09:00')
+                    const aE = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
                     let placed = false
                     for (let ci = 0; ci < colEnd.length; ci++) {
                       if (aS >= colEnd[ci]) {
                         apptCol.set(a.id, ci)
-                        colEnd[ci] = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
+                        colEnd[ci] = aE
                         placed = true; break
                       }
                     }
                     if (!placed) {
                       apptCol.set(a.id, colEnd.length)
-                      colEnd.push(timeToMin(a.ora_fine?.slice(0,5)||'10:00'))
+                      colEnd.push(aE)
                     }
                   })
 
@@ -331,16 +329,18 @@ export default function Agenda() {
                     const eMin = timeToMin(a.ora_fine?.slice(0,5)||'10:00')
                     const top = (sMin - H_START*60)/60*48
                     const ht = Math.max((eMin-sMin)/60*48-2, 18)
-                    const pct = 100/5 // percentuale larghezza colonna giorno
-                    const colW = pct/totalCols
+
+                    // Posizione: dayIdx determina la colonna del giorno, col l'affiancamento
+                    const dayFrac = 1/5  // ogni giorno è 1/5 della larghezza totale
+                    const colFrac = dayFrac / totalCols
 
                     return (
                       <div key={a.id} style={{
                         position:'absolute',
                         top,
                         height:ht,
-                        left:`calc(48px + ${dayIdx * pct}% * (100% - 48px)/100 + ${col * colW}% * (100% - 48px)/100 + 1px)`,
-                        width:`calc(${colW}% * (100% - 48px)/100 - 2px)`,
+                        left:`calc(48px + (100% - 48px) * ${dayIdx * dayFrac + col * colFrac} + 1px)`,
+                        width:`calc((100% - 48px) * ${colFrac} - 2px)`,
                         background:TIPO_COLOR[a.tipo]||'#D3D1C7',
                         color:TIPO_TEXT[a.tipo]||'#444',
                         borderRadius:4, padding:'2px 5px', fontSize:11,
