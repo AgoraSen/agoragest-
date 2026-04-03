@@ -33,6 +33,9 @@ export default function Candidati() {
   const [form, setForm] = useState({})
   const [showColloquioModal, setShowColloquioModal] = useState(false)
   const [colloquioForm, setColloquioForm] = useState({ data: '', operatore_nome: '', note: '' })
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [importPreview, setImportPreview] = useState([])
+  const [importLoading, setImportLoading] = useState(false)
   const PAGE_SIZE = 30
 
   useEffect(() => { loadProfiles(); loadCandidati() }, [])
@@ -128,13 +131,76 @@ export default function Candidati() {
   }
 
   async function exportCsv() {
-    const header = 'Nome,Cognome,CF,Email,Telefono,Comune,Stato,Percorso'
+    const bom = '\uFEFF'
+    const header = 'Nome;Cognome;CF;Email;Telefono;Comune;Stato;Percorso'
     const rows = filtered.map(c =>
       [c.nome, c.cognome, c.cf, c.email, c.tel, c.comune, c.stato, c.percorso]
-        .map(v => `"${(v||'').replace(/"/g,'""')}"`).join(',')
+        .map(v => `"${(v||'').replace(/"/g,'""')}"`).join(';')
     )
-    const blob = new Blob([header + '\n' + rows.join('\n')], { type: 'text/csv;charset=utf-8' })
+    const blob = new Blob([bom + header + '\n' + rows.join('\n')], { type: 'text/csv;charset=utf-8' })
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'candidati.csv'; a.click()
+  }
+
+  function downloadTemplate() {
+    const bom = '\uFEFF'
+    const header = 'Nome;Cognome;CF;Email;Telefono;Comune;Stato;Percorso;Note'
+    const examples = [
+      'Mario;Rossi;RSSMRA80A01H501A;mario.rossi@email.it;3331234567;Roma;In attesa;Percorso 1;',
+      'Giulia;Bianchi;BNCGLI90B41F205X;giulia.bianchi@email.it;3479876543;Milano;In formazione;Percorso 2;Note varie',
+    ]
+    const blob = new Blob([bom + header + '\n' + examples.join('\n')], { type: 'text/csv;charset=utf-8' })
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'template_candidati.csv'; a.click()
+  }
+
+  function handleImportFile(file) {
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = e => {
+      const text = e.target.result.replace(/^\uFEFF/, '')
+      const lines = text.split('\n').filter(l => l.trim())
+      if (lines.length < 2) { alert('File vuoto o senza dati.'); return }
+      const sep = lines[0].includes(';') ? ';' : ','
+      const header = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/["\r]/g, ''))
+      const rows = []
+      for (let i = 1; i < lines.length; i++) {
+        const vals = lines[i].split(sep).map(v => v.trim().replace(/["\r]/g, ''))
+        const obj = {}
+        header.forEach((h, j) => obj[h] = vals[j] || '')
+        const get = (...keys) => { for (const k of keys) { if (obj[k]) return obj[k] } return null }
+        const nome = get('nome','name','firstname')
+        const cognome = get('cognome','surname','lastname')
+        if (!nome && !cognome) continue
+        const stato = STATI.includes(get('stato','status')) ? get('stato','status') : 'In attesa'
+        rows.push({
+          nome: nome||'', cognome: cognome||'',
+          cf: get('cf','codice fiscale','codicefiscale')||null,
+          email: get('email')||null,
+          tel: get('telefono','tel','phone')||null,
+          comune: get('comune','city','città')||null,
+          stato, percorso: get('percorso')||null,
+          note: get('note','notes')||null,
+          referente_id: profile.id,
+        })
+      }
+      if (rows.length === 0) { alert('Nessun candidato valido. Controlla le colonne.'); return }
+      setImportPreview(rows)
+      setShowImportModal(true)
+    }
+    reader.readAsText(file, 'utf-8')
+  }
+
+  async function confirmImport() {
+    if (!importPreview.length) return
+    setImportLoading(true)
+    const { error } = await supabase.from('candidati').insert(importPreview)
+    setImportLoading(false)
+    if (error) alert('Errore: ' + error.message)
+    else {
+      alert(`${importPreview.length} candidati importati!`)
+      setShowImportModal(false)
+      setImportPreview([])
+      loadCandidati()
+    }
   }
 
   function fmtDate(s) {
@@ -150,7 +216,12 @@ export default function Candidati() {
       {/* Header */}
       <div style={styles.topbar}>
         <h2 style={styles.title}>Candidati <span style={styles.count}>({candidati.length})</span></h2>
-        <button style={styles.btnSecondary} onClick={exportCsv}>↓ CSV</button>
+        <button style={styles.btnSecondary} onClick={downloadTemplate}>↓ Template CSV</button>
+        <label style={{...styles.btnSecondary,cursor:'pointer'}}>
+          ↑ Importa CSV
+          <input type="file" accept=".csv,.txt" style={{display:'none'}} onChange={e=>handleImportFile(e.target.files[0])}/>
+        </label>
+        <button style={styles.btnSecondary} onClick={exportCsv}>↓ Esporta CSV</button>
         <button style={styles.btnPrimary} onClick={openAdd}>+ Nuovo candidato</button>
       </div>
 
@@ -357,6 +428,48 @@ export default function Candidati() {
             <div style={styles.modalActions}>
               <button style={styles.btnSecondary} onClick={() => setShowColloquioModal(false)}>Annulla</button>
               <button style={styles.btnPrimary} onClick={saveColloquio}>Salva</button>
+            </div>
+          </div>
+        </>
+      )}
+      {/* Modal import */}
+      {showImportModal && (
+        <>
+          <div style={styles.overlay} onClick={() => { setShowImportModal(false); setImportPreview([]) }} />
+          <div style={{...styles.modal, width:'min(700px,96vw)'}}>
+            <h3 style={styles.modalTitle}>Anteprima importazione — {importPreview.length} candidati</h3>
+            <div style={{overflowY:'auto',maxHeight:360,border:'0.5px solid #e8e5e0',borderRadius:8}}>
+              <table style={{...styles.table,fontSize:12}}>
+                <thead><tr>
+                  {['Nome','Cognome','CF','Email','Telefono','Comune','Stato','Percorso'].map(h=>(
+                    <th key={h} style={{...styles.th,fontSize:11}}>{h}</th>
+                  ))}
+                </tr></thead>
+                <tbody>
+                  {importPreview.slice(0,20).map((r,i)=>(
+                    <tr key={i}>
+                      <td style={styles.td}>{r.nome}</td>
+                      <td style={styles.td}>{r.cognome}</td>
+                      <td style={{...styles.td,color:'#888'}}>{r.cf||'—'}</td>
+                      <td style={{...styles.td,color:'#888'}}>{r.email||'—'}</td>
+                      <td style={{...styles.td,color:'#888'}}>{r.tel||'—'}</td>
+                      <td style={{...styles.td,color:'#888'}}>{r.comune||'—'}</td>
+                      <td style={styles.td}><span style={{...styles.badge,...STATI_COLOR[r.stato]}}>{r.stato}</span></td>
+                      <td style={{...styles.td,color:'#888'}}>{r.percorso||'—'}</td>
+                    </tr>
+                  ))}
+                  {importPreview.length > 20 && (
+                    <tr><td colSpan={8} style={{...styles.td,textAlign:'center',color:'#888',fontStyle:'italic'}}>...e altri {importPreview.length-20} candidati</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            {importLoading && <div style={{fontSize:13,color:'#888',textAlign:'center'}}>Importazione in corso...</div>}
+            <div style={styles.modalActions}>
+              <button style={styles.btnSecondary} onClick={()=>{setShowImportModal(false);setImportPreview([])}}>Annulla</button>
+              <button style={styles.btnPrimary} onClick={confirmImport} disabled={importLoading}>
+                Importa {importPreview.length} candidati
+              </button>
             </div>
           </div>
         </>
