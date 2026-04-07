@@ -38,14 +38,13 @@ export default function Layout({ children, page, onNavigate }) {
 
   // Raggruppa per sezione
   const sections = []
-  let currentSection = null
   allNav.forEach(item => {
-    const sec = SECTION_LABELS[item.id]
-    if (sec !== currentSection) {
-      currentSection = sec
+    const sec = SECTION_LABELS[item.id] || null
+    const last = sections[sections.length - 1]
+    if (!last || last.label !== sec) {
       sections.push({ label: sec, items: [item] })
     } else {
-      sections[sections.length - 1].items.push(item)
+      last.items.push(item)
     }
   })
 
