@@ -3,19 +3,83 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#1a3a5c" />
+    <meta name="theme-color" content="#6366f1" />
     <title>Agorà Gestionale</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
     <style>
-      * { box-sizing: border-box; }
-      body { margin: 0; font-family: 'DM Sans', system-ui, sans-serif; }
-      input:focus, select:focus, textarea:focus {
-        border-color: #1a3a5c !important;
-        box-shadow: 0 0 0 2px rgba(26,58,92,0.1);
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      
+      :root {
+        --font: 'DM Sans', system-ui, -apple-system, sans-serif;
+        --bg: #f8f7ff;
+        --surface: #ffffff;
+        --border: #e8e6f0;
+        --border-light: #f0eef8;
+        --text: #0f0e17;
+        --text-secondary: #6b7280;
+        --text-muted: #9ca3af;
+        
+        /* Brand gradient */
+        --grad-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        --grad-warm: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+        --grad-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        --grad-blue: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+        
+        /* Colors */
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --primary-light: #ede9fe;
+        --secondary: #8b5cf6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        
+        /* Shadows */
+        --shadow-sm: 0 1px 3px rgba(99,102,241,0.08), 0 1px 2px rgba(0,0,0,0.04);
+        --shadow: 0 4px 16px rgba(99,102,241,0.10), 0 2px 4px rgba(0,0,0,0.04);
+        --shadow-lg: 0 10px 40px rgba(99,102,241,0.15), 0 4px 12px rgba(0,0,0,0.06);
+        --shadow-glow: 0 0 0 3px rgba(99,102,241,0.15);
+        
+        --radius: 12px;
+        --radius-sm: 8px;
+        --radius-lg: 16px;
+        --radius-xl: 24px;
       }
-      tr:hover td { background: #fafaf8; }
-      button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+      
+      body {
+        margin: 0;
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+      /* Focus */
+      input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: var(--primary) !important;
+        box-shadow: var(--shadow-glow) !important;
+      }
+
+      /* Table hover */
+      tr:hover td { background: #faf9ff !important; }
+
+      button:disabled { opacity: 0.45; cursor: not-allowed; }
+      
+      /* Transizioni globali */
+      button { transition: all 0.15s ease; }
+      button:hover:not(:disabled) { transform: translateY(-1px); }
+      button:active:not(:disabled) { transform: translateY(0); }
     </style>
   </head>
   <body>

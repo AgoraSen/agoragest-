@@ -72,16 +72,33 @@ export default function Corsi() {
   async function saveCorso() {
     if (!form.nome) return
     try {
+      // Mappa i campi del form ai nomi delle colonne reali nel database
+      const payload = {
+        nome: form.nome,
+        codice: form.codice || null,
+        tipo: form.tipo || 'interno',
+        stato: form.stato || 'programmato',
+        data_inizio: form.data_inizio || null,
+        data_fine: form.data_fine || null,
+        sede: form.sede || null,
+        aula: form.aula || null,
+        ore: form.ore_totali || null,
+        ore_totali: form.ore_totali || null,
+        max_partecipanti: form.max_partecipanti || null,
+        costo: form.costo || null,
+        finanziamento: form.finanziamento || null,
+        ente_finanziatore: form.ente_finanziatore || null,
+        note: form.note || null,
+        updated_at: new Date().toISOString(),
+      }
       if (editId) {
-        const { error } = await supabase.from('corsi').update({...form,updated_at:new Date().toISOString()}).eq('id',editId)
+        const { error } = await supabase.from('corsi').update(payload).eq('id', editId)
         if (error) { alert('Errore: '+error.message); return }
       } else {
-        const { error } = await supabase.from('corsi').insert([form])
+        const { error } = await supabase.from('corsi').insert([payload])
         if (error) { alert('Errore: '+error.message); return }
       }
-      setShowModal(false)
-      setEditId(null)
-      setForm({})
+      setShowModal(false); setEditId(null); setForm({})
       await loadCorsi()
       if (editId && selected?.id===editId) {
         const { data } = await supabase.from('corsi').select('*').eq('id',editId).single()
