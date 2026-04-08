@@ -141,7 +141,7 @@ const S = {
   },
   sidebar: {
     width: 224,
-    background: 'linear-gradient(180deg, #1e1b4b 0%, #312e81 100%)',
+    background: 'linear-gradient(180deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%)',
     display: 'flex',
     flexDirection: 'column',
     flexShrink: 0,
@@ -152,7 +152,7 @@ const S = {
     overflowX: 'hidden',
     zIndex: 100,
     transition: 'width 0.2s ease',
-    boxShadow: '2px 0 20px rgba(99,102,241,0.15)',
+    boxShadow: '4px 0 24px rgba(109,40,217,0.2)',
   },
   sidebarCollapsed: {
     width: 64,
@@ -328,8 +328,8 @@ const S = {
     alignItems: 'center',
     gap: 12,
     padding: '12px 16px',
-    background: 'linear-gradient(135deg, #0f0e1a 0%, #1a1830 100%)',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+    background: 'linear-gradient(135deg, #4f46e5 0%, #db2777 100%)',
+    boxShadow: '0 2px 8px rgba(109,40,217,0.3)',
   },
   menuBtn: {
     background: 'none',
