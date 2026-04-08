@@ -140,9 +140,9 @@ export default function Utenti() {
                     <tr key={u.id}>
                       <td style={s.td}><div style={{...s.avatar,opacity:u.attivo?1:.4}}>{u.nome?.[0]}{u.cognome?.[0]}</div></td>
                       <td style={s.td}><strong>{u.nome} {u.cognome}</strong>{u.id===me?.id&&<span style={s.youBadge}>tu</span>}</td>
-                      <td style={{...s.td,color:'#888'}}>{u.email}</td>
+                      <td style={{...s.td,color:'var(--text-secondary)'}}>{u.email}</td>
                       <td style={s.td}><span style={{...s.badge,...(RUOLO_COLOR[u.ruolo]||RUOLO_COLOR.base)}}>{RUOLO_LABEL[u.ruolo]||u.ruolo}</span></td>
-                      <td style={s.td}><span style={{fontSize:12,color:u.attivo?'#27500A':'#aaa'}}>{u.attivo?'Attivo':'Disattivato'}</span></td>
+                      <td style={s.td}><span style={{fontSize:12,color:u.attivo?'#27500A':'var(--text-muted)'}}>{u.attivo?'Attivo':'Disattivato'}</span></td>
                       <td style={s.td}>
                         <div style={{display:'flex',gap:6}}>
                           <button style={s.btnSmall} onClick={()=>{setEditForm(u);setShowEdit(true)}}>Modifica</button>
@@ -169,15 +169,15 @@ export default function Utenti() {
           </div>
           <div style={{display:'flex',gap:8,marginBottom:'1rem',alignItems:'center',flexWrap:'wrap'}}>
             <button style={s.btnSecondary} onClick={downloadTemplate}>↓ Scarica template CSV</button>
-            <span style={{fontSize:12,color:'#888'}}>Colonne: nome, cognome, email, ruolo (admin/senior/base)</span>
+            <span style={{fontSize:12,color:'var(--text-secondary)'}}>Colonne: nome, cognome, email, ruolo (admin/senior/base)</span>
           </div>
           <div style={s.dropZone}
             onClick={()=>document.getElementById('import-file').click()}
             onDragOver={e=>e.preventDefault()}
             onDrop={e=>{e.preventDefault();handleImportFile(e.dataTransfer.files[0])}}>
             <div style={{fontSize:28,marginBottom:8}}>📂</div>
-            <div style={{fontSize:14,fontWeight:500,color:'#1a1a1a',marginBottom:4}}>Trascina il file CSV qui oppure clicca per selezionarlo</div>
-            <div style={{fontSize:12,color:'#888'}}>Formato supportato: .csv</div>
+            <div style={{fontSize:14,fontWeight:500,color:'var(--text)',marginBottom:4}}>Trascina il file CSV qui oppure clicca per selezionarlo</div>
+            <div style={{fontSize:12,color:'var(--text-secondary)'}}>Formato supportato: .csv</div>
             <input id="import-file" type="file" accept=".csv,.txt" style={{display:'none'}} onChange={e=>handleImportFile(e.target.files[0])}/>
           </div>
 
@@ -189,7 +189,7 @@ export default function Utenti() {
 
           {importRows.length>0&&(
             <div style={{marginTop:'1rem'}}>
-              <div style={{fontSize:13,fontWeight:600,color:'#1a1a1a',marginBottom:8}}>Anteprima — {importRows.length} utenti</div>
+              <div style={{fontSize:13,fontWeight:600,color:'var(--text)',marginBottom:8}}>Anteprima — {importRows.length} utenti</div>
               <div style={s.tableWrap}>
                 <table style={s.table}>
                   <thead><tr>{['Nome','Cognome','Email','Ruolo'].map(h=><th key={h} style={s.th}>{h}</th>)}</tr></thead>
@@ -202,7 +202,7 @@ export default function Utenti() {
                         <td style={s.td}><span style={{...s.badge,...(RUOLO_COLOR[r.ruolo]||RUOLO_COLOR.base)}}>{RUOLO_LABEL[r.ruolo]||r.ruolo}</span></td>
                       </tr>
                     ))}
-                    {importRows.length>8&&<tr><td colSpan={4} style={{...s.td,color:'#888',textAlign:'center',fontStyle:'italic'}}>...e altri {importRows.length-8} utenti</td></tr>}
+                    {importRows.length>8&&<tr><td colSpan={4} style={{...s.td,color:'var(--text-secondary)',textAlign:'center',fontStyle:'italic'}}>...e altri {importRows.length-8} utenti</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -212,7 +212,7 @@ export default function Utenti() {
                   {importLoading?`Importazione in corso...`:`Importa ${importRows.length} utenti`}
                 </button>
               </div>
-              {importLoading&&<div style={{fontSize:12,color:'#888',marginTop:6}}>Attendere — si evitano errori di rate limit inviando un utente alla volta...</div>}
+              {importLoading&&<div style={{fontSize:12,color:'var(--text-secondary)',marginTop:6}}>Attendere — si evitano errori di rate limit inviando un utente alla volta...</div>}
             </div>
           )}
         </div>
@@ -281,31 +281,31 @@ export default function Utenti() {
 const s = {
   wrap:{maxWidth:900,margin:'0 auto'},
   topbar:{display:'flex',alignItems:'center',gap:8,marginBottom:'1rem'},
-  title:{fontSize:20,fontWeight:600,color:'#1a1a1a',flex:1,margin:0},
+  title:{fontSize:20,fontWeight:600,color:'var(--text)',flex:1,margin:0},
   tabs:{display:'flex',gap:4,marginBottom:'1.25rem'},
-  tab:{padding:'5px 16px',border:'0.5px solid #e8e5e0',borderRadius:20,fontSize:13,cursor:'pointer',color:'#888'},
-  tabActive:{background:'#1a3a5c',color:'#fff',borderColor:'#1a3a5c'},
-  info:{background:'#f0f7ff',border:'0.5px solid #bdd6ee',borderRadius:8,padding:'10px 14px',fontSize:13,color:'#1a3a5c',marginBottom:'1rem'},
-  tableWrap:{background:'#fff',border:'0.5px solid #e8e5e0',borderRadius:12,overflow:'hidden'},
+  tab:{padding:'5px 16px',border:'1px solid var(--border)',borderRadius:20,fontSize:13,cursor:'pointer',color:'var(--text-secondary)'},
+  tabActive:{background:'var(--grad-primary)',color:'var(--surface)',borderColor:'#1a3a5c'},
+  info:{background:'#f0f7ff',border:'0.5px solid #bdd6ee',borderRadius:'var(--radius-sm)',padding:'10px 14px',fontSize:13,color:'#1a3a5c',marginBottom:'1rem'},
+  tableWrap:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',overflow:'hidden'},
   table:{width:'100%',borderCollapse:'collapse',fontSize:13},
-  th:{padding:'9px 12px',textAlign:'left',color:'#888',fontWeight:400,borderBottom:'0.5px solid #f0ede8',background:'#fafaf8',fontSize:12},
-  td:{padding:'10px 12px',borderBottom:'0.5px solid #f5f3ee',color:'#1a1a1a',verticalAlign:'middle'},
-  avatar:{width:32,height:32,borderRadius:'50%',background:'#1a3a5c',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:600},
+  th:{padding:'9px 12px',textAlign:'left',color:'var(--text-secondary)',fontWeight:400,borderBottom:'1px solid var(--border-light)',background:'var(--bg)',fontSize:12},
+  td:{padding:'10px 12px',borderBottom:'1px solid var(--border-light)',color:'var(--text)',verticalAlign:'middle'},
+  avatar:{width:32,height:32,borderRadius:'50%',background:'var(--grad-primary)',color:'var(--surface)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:600},
   badge:{display:'inline-block',fontSize:11,padding:'2px 8px',borderRadius:20},
-  youBadge:{marginLeft:6,background:'#f0ede8',color:'#888',fontSize:10,padding:'1px 6px',borderRadius:10},
-  btnSmall:{background:'#fff',border:'0.5px solid #d8d5ce',borderRadius:6,padding:'4px 10px',fontSize:12,cursor:'pointer',color:'#333'},
-  empty:{padding:'2rem',textAlign:'center',color:'#aaa'},
-  dropZone:{border:'1.5px dashed #d8d5ce',borderRadius:12,padding:'2.5rem',textAlign:'center',cursor:'pointer',background:'#fafaf8'},
-  msgBox:{borderRadius:8,padding:'10px 14px',fontSize:13,marginTop:12},
+  youBadge:{marginLeft:6,background:'#f0ede8',color:'var(--text-secondary)',fontSize:10,padding:'1px 6px',borderRadius:10},
+  btnSmall:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:6,padding:'4px 10px',fontSize:12,cursor:'pointer',color:'#333'},
+  empty:{padding:'2rem',textAlign:'center',color:'var(--text-muted)'},
+  dropZone:{border:'1.5px dashed #d8d5ce',borderRadius:'var(--radius)',padding:'2.5rem',textAlign:'center',cursor:'pointer',background:'var(--bg)'},
+  msgBox:{borderRadius:'var(--radius-sm)',padding:'10px 14px',fontSize:13,marginTop:12},
   msgOk:{background:'#EAF3DE',border:'0.5px solid #1D9E75',color:'#27500A'},
   msgErr:{background:'#FCEBEB',border:'0.5px solid #E24B4A',color:'#791F1F'},
   overlay:{position:'fixed',inset:0,background:'rgba(0,0,0,0.18)',zIndex:20},
-  modal:{position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'#fff',border:'0.5px solid #e8e5e0',borderRadius:14,padding:'1.5rem',zIndex:40,width:'min(460px,96vw)',maxHeight:'90vh',overflowY:'auto',display:'flex',flexDirection:'column',gap:10},
-  modalTitle:{fontSize:16,fontWeight:600,color:'#1a1a1a',margin:0},
+  modal:{position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius-lg)',padding:'1.5rem',zIndex:40,width:'min(460px,96vw)',maxHeight:'90vh',overflowY:'auto',display:'flex',flexDirection:'column',gap:10},
+  modalTitle:{fontSize:16,fontWeight:600,color:'var(--text)',margin:0},
   modalActions:{display:'flex',gap:8,justifyContent:'flex-end',marginTop:4},
   field:{display:'flex',flexDirection:'column',gap:4},
-  label:{fontSize:12,color:'#888'},
-  input:{padding:'8px 10px',border:'0.5px solid #d8d5ce',borderRadius:8,fontSize:13,background:'#fafaf8',color:'#1a1a1a',outline:'none',width:'100%'},
-  btnPrimary:{background:'#1a3a5c',color:'#fff',border:'none',borderRadius:8,padding:'7px 16px',fontSize:13,cursor:'pointer',fontWeight:500},
-  btnSecondary:{background:'#fff',color:'#333',border:'0.5px solid #d8d5ce',borderRadius:8,padding:'7px 14px',fontSize:13,cursor:'pointer'},
+  label:{fontSize:12,color:'var(--text-secondary)'},
+  input:{padding:'8px 10px',border:'1px solid var(--border)',borderRadius:'var(--radius-sm)',fontSize:13,background:'var(--bg)',color:'var(--text)',outline:'none',width:'100%'},
+  btnPrimary:{background:'var(--grad-primary)',color:'var(--surface)',border:'none',borderRadius:'var(--radius-sm)',padding:'7px 16px',fontSize:13,cursor:'pointer',fontWeight:500},
+  btnSecondary:{background:'var(--surface)',color:'#333',border:'1px solid var(--border)',borderRadius:'var(--radius-sm)',padding:'7px 14px',fontSize:13,cursor:'pointer'},
 }

@@ -141,7 +141,7 @@ const S = {
   },
   sidebar: {
     width: 224,
-    background: 'linear-gradient(180deg, #0f0e1a 0%, #1a1830 100%)',
+    background: 'linear-gradient(180deg, #1e1b4b 0%, #312e81 100%)',
     display: 'flex',
     flexDirection: 'column',
     flexShrink: 0,
@@ -152,7 +152,7 @@ const S = {
     overflowX: 'hidden',
     zIndex: 100,
     transition: 'width 0.2s ease',
-    boxShadow: '2px 0 20px rgba(0,0,0,0.2)',
+    boxShadow: '2px 0 20px rgba(99,102,241,0.15)',
   },
   sidebarCollapsed: {
     width: 64,

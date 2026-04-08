@@ -68,19 +68,19 @@ export default function Impostazioni() {
               {valori.azienda_logo_url && (
                 <img src={valori.azienda_logo_url} alt="Logo" style={{height:40,marginBottom:8,display:'block'}} onError={e=>e.target.style.display='none'}/>
               )}
-              <div style={{fontSize:16,fontWeight:700,color:'#1a1a1a'}}>{valori.azienda_nome}</div>
+              <div style={{fontSize:16,fontWeight:700,color:'var(--text)'}}>{valori.azienda_nome}</div>
               {valori.azienda_indirizzo && <div style={{fontSize:13,color:'#555',marginTop:2}}>{valori.azienda_indirizzo}{valori.azienda_citta?` — ${valori.azienda_citta}`:''}</div>}
-              <div style={{fontSize:12,color:'#888',marginTop:6,display:'flex',gap:16,flexWrap:'wrap'}}>
+              <div style={{fontSize:12,color:'var(--text-secondary)',marginTop:6,display:'flex',gap:16,flexWrap:'wrap'}}>
                 {valori.azienda_telefono && <span>Tel: {valori.azienda_telefono}</span>}
                 {valori.azienda_email && <span>Email: {valori.azienda_email}</span>}
                 {valori.azienda_pec && <span>PEC: {valori.azienda_pec}</span>}
               </div>
-              <div style={{fontSize:12,color:'#888',marginTop:4,display:'flex',gap:16,flexWrap:'wrap'}}>
+              <div style={{fontSize:12,color:'var(--text-secondary)',marginTop:4,display:'flex',gap:16,flexWrap:'wrap'}}>
                 {valori.azienda_piva && <span>P.IVA: {valori.azienda_piva}</span>}
                 {valori.azienda_cf && <span>C.F.: {valori.azienda_cf}</span>}
                 {valori.azienda_sdi && <span>SDI: {valori.azienda_sdi}</span>}
               </div>
-              {valori.azienda_iban && <div style={{fontSize:12,color:'#888',marginTop:4}}>IBAN: {valori.azienda_iban}</div>}
+              {valori.azienda_iban && <div style={{fontSize:12,color:'var(--text-secondary)',marginTop:4}}>IBAN: {valori.azienda_iban}</div>}
             </div>
           </div>
         )}
@@ -125,21 +125,21 @@ export default function Impostazioni() {
 
 const s = {
   wrap: { maxWidth: 800, margin: '0 auto' },
-  loading: { padding: '2rem', color: '#888', fontSize: 14 },
+  loading: { padding: '2rem', color: 'var(--text-secondary)', fontSize: 14 },
   topbar: { display: 'flex', alignItems: 'center', marginBottom: '1.25rem' },
-  title: { fontSize: 20, fontWeight: 600, color: '#1a1a1a', margin: 0 },
-  card: { background: '#fff', border: '0.5px solid #e8e5e0', borderRadius: 12, padding: '1.5rem', marginBottom: '1rem' },
-  sectionTitle: { fontSize: 15, fontWeight: 600, color: '#1a1a1a', marginBottom: 6 },
-  sectionDesc: { fontSize: 13, color: '#888', marginBottom: '1.25rem' },
+  title: { fontSize: 20, fontWeight: 600, color: 'var(--text)', margin: 0 },
+  card: { background: 'var(--surface)', border: '0.5px solid #e8e5e0', borderRadius: 12, padding: '1.5rem', marginBottom: '1rem' },
+  sectionTitle: { fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 6 },
+  sectionDesc: { fontSize: 13, color: 'var(--text-secondary)', marginBottom: '1.25rem' },
   preview: { marginBottom: '1.5rem' },
-  previewTitle: { fontSize: 12, color: '#888', marginBottom: 8 },
+  previewTitle: { fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 },
   previewBox: { background: '#f5f4f0', border: '0.5px solid #e8e5e0', borderRadius: 8, padding: '14px 16px' },
   grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 16px' },
   field: { display: 'flex', flexDirection: 'column', gap: 4 },
-  label: { fontSize: 12, color: '#888', fontWeight: 500 },
-  input: { padding: '8px 10px', border: '0.5px solid #d8d5ce', borderRadius: 8, fontSize: 13, background: '#fafaf8', color: '#1a1a1a', outline: 'none', width: '100%' },
-  btnPrimary: { background: '#1a3a5c', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 20px', fontSize: 13, cursor: 'pointer', fontWeight: 500 },
-  versionBox: { background: '#fff', border: '0.5px solid #e8e5e0', borderRadius: 12, padding: '1rem 1.5rem' },
-  versionTitle: { fontSize: 13, fontWeight: 600, color: '#888', marginBottom: 10 },
-  versionRow: { display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#888', padding: '4px 0', borderBottom: '0.5px solid #f5f3ee' },
+  label: { fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 },
+  input: { padding: '8px 10px', border: '0.5px solid #d8d5ce', borderRadius: 8, fontSize: 13, background: '#fafaf8', color: 'var(--text)', outline: 'none', width: '100%' },
+  btnPrimary: { background: '#1a3a5c', color: 'var(--surface)', border: 'none', borderRadius: 8, padding: '8px 20px', fontSize: 13, cursor: 'pointer', fontWeight: 500 },
+  versionBox: { background: 'var(--surface)', border: '0.5px solid #e8e5e0', borderRadius: 12, padding: '1rem 1.5rem' },
+  versionTitle: { fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 10 },
+  versionRow: { display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)', padding: '4px 0', borderBottom: '0.5px solid #f5f3ee' },
 }

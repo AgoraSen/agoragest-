@@ -278,17 +278,17 @@ export default function Aziende() {
               </select>
             </div>
           </div>
-          <div style={{fontSize:12,color:'#888',marginBottom:8}}>{filtered.length} aziende</div>
+          <div style={{fontSize:12,color:'var(--text-secondary)',marginBottom:8}}>{filtered.length} aziende</div>
           <div style={{overflowY:'auto',maxHeight:'calc(100vh - 280px)'}}>
-            {loading ? <div style={{padding:16,color:'#aaa',fontSize:13}}>Caricamento...</div>
-              : filtered.length === 0 ? <div style={{padding:16,color:'#aaa',fontSize:13}}>Nessuna azienda trovata.</div>
+            {loading ? <div style={{padding:16,color:'var(--text-muted)',fontSize:13}}>Caricamento...</div>
+              : filtered.length === 0 ? <div style={{padding:16,color:'var(--text-muted)',fontSize:13}}>Nessuna azienda trovata.</div>
               : filtered.map(a=>(
               <div key={a.id} style={{...s.azCard,...(selected?.id===a.id?s.azCardActive:{})}} onClick={()=>{setSelected(a);setTab('info')}}>
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:6}}>
-                  <div style={{fontSize:14,fontWeight:600,color:'#1a1a1a',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.nome}</div>
+                  <div style={{fontSize:14,fontWeight:600,color:'var(--text)',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.nome}</div>
                   <span style={{...s.badge,...(TIPO_COLOR[a.tipo]||TIPO_COLOR.assunzione),flexShrink:0}}>{TIPI[a.tipo]||a.tipo}</span>
                 </div>
-                {a.settore&&<div style={{fontSize:12,color:'#888',marginTop:2}}>{a.settore}{a.citta?` · ${a.citta}`:''}</div>}
+                {a.settore&&<div style={{fontSize:12,color:'var(--text-secondary)',marginTop:2}}>{a.settore}{a.citta?` · ${a.citta}`:''}</div>}
               </div>
             ))}
           </div>
@@ -297,7 +297,7 @@ export default function Aziende() {
         {/* Dettaglio azienda */}
         <div style={s.detail}>
           {!selected ? (
-            <div style={{padding:'3rem',textAlign:'center',color:'#aaa'}}>
+            <div style={{padding:'3rem',textAlign:'center',color:'var(--text-muted)'}}>
               <div style={{fontSize:32,marginBottom:8}}>🏢</div>
               <div style={{fontSize:14}}>Seleziona un'azienda dalla lista</div>
             </div>
@@ -305,8 +305,8 @@ export default function Aziende() {
             <>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'1rem',gap:8}}>
                 <div>
-                  <h3 style={{fontSize:18,fontWeight:700,color:'#1a1a1a',margin:0}}>{selected.nome}</h3>
-                  <div style={{fontSize:13,color:'#888',marginTop:4,display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <h3 style={{fontSize:18,fontWeight:700,color:'var(--text)',margin:0}}>{selected.nome}</h3>
+                  <div style={{fontSize:13,color:'var(--text-secondary)',marginTop:4,display:'flex',gap:12,flexWrap:'wrap'}}>
                     {selected.settore&&<span>{selected.settore}</span>}
                     {selected.citta&&<span>📍 {selected.citta}</span>}
                     {selected.telefono&&<span>📞 {selected.telefono}</span>}
@@ -353,18 +353,18 @@ export default function Aziende() {
                   <div style={{display:'flex',justifyContent:'flex-end',marginBottom:12}}>
                     <button style={s.btnPrimary} onClick={()=>{setRefForm({});setShowReferenteModal(true)}}>+ Aggiungi referente</button>
                   </div>
-                  {referenti.length===0?<div style={{fontSize:13,color:'#aaa',padding:'1rem'}}>Nessun referente aggiunto.</div>
+                  {referenti.length===0?<div style={{fontSize:13,color:'var(--text-muted)',padding:'1rem'}}>Nessun referente aggiunto.</div>
                   :referenti.map(r=>(
                     <div key={r.id} style={{...s.card,marginBottom:8,display:'flex',gap:12,alignItems:'flex-start'}}>
-                      <div style={{width:36,height:36,borderRadius:'50%',background:'#1a3a5c',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:600,flexShrink:0}}>{r.nome?.[0]}</div>
+                      <div style={{width:36,height:36,borderRadius:'50%',background:'var(--grad-primary)',color:'var(--surface)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:600,flexShrink:0}}>{r.nome?.[0]}</div>
                       <div style={{flex:1}}>
                         <div style={{fontSize:14,fontWeight:600}}>{r.nome}</div>
-                        {r.ruolo&&<div style={{fontSize:12,color:'#888'}}>{r.ruolo}</div>}
+                        {r.ruolo&&<div style={{fontSize:12,color:'var(--text-secondary)'}}>{r.ruolo}</div>}
                         <div style={{display:'flex',gap:12,marginTop:4,flexWrap:'wrap'}}>
                           {r.telefono&&<span style={{fontSize:12,color:'#555'}}>📞 {r.telefono}</span>}
                           {r.email&&<span style={{fontSize:12,color:'#555'}}>✉️ {r.email}</span>}
                         </div>
-                        {r.note&&<div style={{fontSize:12,color:'#aaa',marginTop:4}}>{r.note}</div>}
+                        {r.note&&<div style={{fontSize:12,color:'var(--text-muted)',marginTop:4}}>{r.note}</div>}
                       </div>
                       <div style={{display:'flex',gap:6}}>
                         <button style={s.btnSmall} onClick={()=>{setRefForm(r);setShowReferenteModal(true)}}>Modifica</button>
@@ -380,13 +380,13 @@ export default function Aziende() {
                   <div style={{display:'flex',justifyContent:'flex-end',marginBottom:12}}>
                     <button style={s.btnPrimary} onClick={()=>{setOffertaForm({stato:'aperta'});setShowOffertaModal(true)}}>+ Aggiungi offerta</button>
                   </div>
-                  {offerte.length===0?<div style={{fontSize:13,color:'#aaa',padding:'1rem'}}>Nessuna offerta inserita.</div>
+                  {offerte.length===0?<div style={{fontSize:13,color:'var(--text-muted)',padding:'1rem'}}>Nessuna offerta inserita.</div>
                   :offerte.map(o=>(
                     <div key={o.id} style={{...s.card,marginBottom:8}}>
                       <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:8}}>
                         <div>
                           <div style={{fontSize:14,fontWeight:600}}>{o.titolo}</div>
-                          <div style={{fontSize:12,color:'#888',marginTop:2,display:'flex',gap:8,flexWrap:'wrap'}}>
+                          <div style={{fontSize:12,color:'var(--text-secondary)',marginTop:2,display:'flex',gap:8,flexWrap:'wrap'}}>
                             {o.tipo_contratto&&<span>{o.tipo_contratto}</span>}
                             {o.data_apertura&&<span>Aperta il {fmtIt(o.data_apertura)}</span>}
                             {o.data_scadenza&&<span>Scade il {fmtIt(o.data_scadenza)}</span>}
@@ -396,7 +396,7 @@ export default function Aziende() {
                         <div style={{display:'flex',flexDirection:'column',gap:4,alignItems:'flex-end'}}>
                           <span style={{fontSize:11,padding:'2px 8px',borderRadius:20,
                             background:o.stato==='aperta'?'#EAF3DE':o.stato==='chiusa'?'#F1EFE8':'#FAEEDA',
-                            color:o.stato==='aperta'?'#27500A':o.stato==='chiusa'?'#888':'#633806'}}>
+                            color:o.stato==='aperta'?'#27500A':o.stato==='chiusa'?'var(--text-secondary)':'#633806'}}>
                             {o.stato}
                           </span>
                           <div style={{display:'flex',gap:4}}>
@@ -415,15 +415,15 @@ export default function Aziende() {
                   <div style={{display:'flex',justifyContent:'flex-end',marginBottom:12}}>
                     <button style={s.btnPrimary} onClick={()=>{setContattoForm({tipo:'telefonata',data:new Date().toISOString().slice(0,10)});setShowContattoModal(true)}}>+ Aggiungi contatto</button>
                   </div>
-                  {contatti.length===0?<div style={{fontSize:13,color:'#aaa',padding:'1rem'}}>Nessun contatto registrato.</div>
+                  {contatti.length===0?<div style={{fontSize:13,color:'var(--text-muted)',padding:'1rem'}}>Nessun contatto registrato.</div>
                   :contatti.map(c=>(
                     <div key={c.id} style={{...s.card,marginBottom:8,display:'flex',gap:12}}>
                       <div style={{fontSize:22}}>{c.tipo==='telefonata'?'📞':c.tipo==='email'?'✉️':c.tipo==='visita'?'🏢':'📝'}</div>
                       <div style={{flex:1}}>
                         <div style={{display:'flex',gap:8,alignItems:'center',marginBottom:4}}>
                           <span style={{fontSize:13,fontWeight:500,textTransform:'capitalize'}}>{c.tipo}</span>
-                          <span style={{fontSize:12,color:'#888'}}>{fmtIt(c.data)}</span>
-                          {c.profiles&&<span style={{fontSize:12,color:'#aaa'}}>{c.profiles.nome} {c.profiles.cognome}</span>}
+                          <span style={{fontSize:12,color:'var(--text-secondary)'}}>{fmtIt(c.data)}</span>
+                          {c.profiles&&<span style={{fontSize:12,color:'var(--text-muted)'}}>{c.profiles.nome} {c.profiles.cognome}</span>}
                         </div>
                         <div style={{fontSize:13,color:'#555'}}>{c.note}</div>
                       </div>
@@ -434,15 +434,15 @@ export default function Aziende() {
 
               {tab==='candidati' && (
                 <div>
-                  {candidatiCollocati.length===0?<div style={{fontSize:13,color:'#aaa',padding:'1rem'}}>Nessun candidato collegato a questa azienda.</div>
+                  {candidatiCollocati.length===0?<div style={{fontSize:13,color:'var(--text-muted)',padding:'1rem'}}>Nessun candidato collegato a questa azienda.</div>
                   :candidatiCollocati.map(c=>(
                     <div key={c.id} style={{...s.card,marginBottom:8,display:'flex',gap:12,alignItems:'center'}}>
-                      <div style={{width:34,height:34,borderRadius:'50%',background:'#1a3a5c',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:600}}>
+                      <div style={{width:34,height:34,borderRadius:'50%',background:'var(--grad-primary)',color:'var(--surface)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:600}}>
                         {c.nome?.[0]}{c.cognome?.[0]}
                       </div>
                       <div style={{flex:1}}>
                         <div style={{fontSize:14,fontWeight:600}}>{c.nome} {c.cognome}</div>
-                        <div style={{fontSize:12,color:'#888',marginTop:2,display:'flex',gap:8}}>
+                        <div style={{fontSize:12,color:'var(--text-secondary)',marginTop:2,display:'flex',gap:8}}>
                           <span>{c.stato}</span>
                           {c.tipo_inserimento&&<span>· {c.tipo_inserimento}</span>}
                         </div>
@@ -589,29 +589,29 @@ export default function Aziende() {
 const s = {
   wrap:{maxWidth:1200,margin:'0 auto'},
   topbar:{display:'flex',alignItems:'center',gap:8,marginBottom:'1rem'},
-  title:{fontSize:20,fontWeight:600,color:'#1a1a1a',flex:1,margin:0},
+  title:{fontSize:20,fontWeight:600,color:'var(--text)',flex:1,margin:0},
   layout:{display:'grid',gridTemplateColumns:'300px 1fr',gap:16,alignItems:'start'},
-  sidebar:{background:'#fff',border:'0.5px solid #e8e5e0',borderRadius:12,padding:'1rem',position:'sticky',top:0},
-  detail:{background:'#fff',border:'0.5px solid #e8e5e0',borderRadius:12,padding:'1.25rem',minHeight:400},
-  azCard:{padding:'10px 12px',borderRadius:8,cursor:'pointer',marginBottom:6,border:'0.5px solid #e8e5e0'},
+  sidebar:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'1rem',position:'sticky',top:0},
+  detail:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'1.25rem',minHeight:400},
+  azCard:{padding:'10px 12px',borderRadius:'var(--radius-sm)',cursor:'pointer',marginBottom:6,border:'1px solid var(--border)'},
   azCardActive:{background:'#f0f7ff',borderColor:'#1a3a5c'},
   tabs:{display:'flex',gap:4,marginBottom:'1.25rem',flexWrap:'wrap'},
-  tab:{padding:'5px 14px',border:'0.5px solid #e8e5e0',borderRadius:20,fontSize:12,cursor:'pointer',color:'#888'},
-  tabActive:{background:'#1a3a5c',color:'#fff',borderColor:'#1a3a5c'},
-  card:{background:'#fafaf8',border:'0.5px solid #e8e5e0',borderRadius:10,padding:'1rem'},
-  cardTitle:{fontSize:12,fontWeight:600,color:'#888',marginBottom:8,textTransform:'uppercase',letterSpacing:.5},
-  infoRow:{display:'flex',gap:8,fontSize:13,padding:'4px 0',borderBottom:'0.5px solid #f0ede8'},
-  infoLabel:{color:'#888',minWidth:120,flexShrink:0},
-  infoVal:{color:'#1a1a1a',flex:1},
+  tab:{padding:'5px 14px',border:'1px solid var(--border)',borderRadius:20,fontSize:12,cursor:'pointer',color:'var(--text-secondary)'},
+  tabActive:{background:'var(--grad-primary)',color:'var(--surface)',borderColor:'#1a3a5c'},
+  card:{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:10,padding:'1rem'},
+  cardTitle:{fontSize:12,fontWeight:600,color:'var(--text-secondary)',marginBottom:8,textTransform:'uppercase',letterSpacing:.5},
+  infoRow:{display:'flex',gap:8,fontSize:13,padding:'4px 0',borderBottom:'1px solid var(--border-light)'},
+  infoLabel:{color:'var(--text-secondary)',minWidth:120,flexShrink:0},
+  infoVal:{color:'var(--text)',flex:1},
   badge:{display:'inline-block',fontSize:11,padding:'2px 8px',borderRadius:20},
   overlay:{position:'fixed',inset:0,background:'rgba(0,0,0,0.18)',zIndex:20},
-  modal:{position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'#fff',border:'0.5px solid #e8e5e0',borderRadius:14,padding:'1.5rem',zIndex:30,width:'min(500px,96vw)',maxHeight:'92vh',overflowY:'auto',display:'flex',flexDirection:'column',gap:10},
-  modalTitle:{fontSize:16,fontWeight:600,color:'#1a1a1a',margin:0},
+  modal:{position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius-lg)',padding:'1.5rem',zIndex:30,width:'min(500px,96vw)',maxHeight:'92vh',overflowY:'auto',display:'flex',flexDirection:'column',gap:10},
+  modalTitle:{fontSize:16,fontWeight:600,color:'var(--text)',margin:0},
   modalActions:{display:'flex',gap:8,justifyContent:'flex-end',marginTop:4},
   field:{display:'flex',flexDirection:'column',gap:4},
-  label:{fontSize:12,color:'#888'},
-  input:{padding:'8px 10px',border:'0.5px solid #d8d5ce',borderRadius:8,fontSize:13,background:'#fafaf8',color:'#1a1a1a',outline:'none',width:'100%'},
-  btnPrimary:{background:'#1a3a5c',color:'#fff',border:'none',borderRadius:8,padding:'7px 16px',fontSize:13,cursor:'pointer',fontWeight:500},
-  btnSecondary:{background:'#fff',color:'#333',border:'0.5px solid #d8d5ce',borderRadius:8,padding:'7px 14px',fontSize:13,cursor:'pointer'},
-  btnSmall:{background:'#fff',border:'0.5px solid #d8d5ce',borderRadius:6,padding:'4px 10px',fontSize:12,cursor:'pointer',color:'#333'},
+  label:{fontSize:12,color:'var(--text-secondary)'},
+  input:{padding:'8px 10px',border:'1px solid var(--border)',borderRadius:'var(--radius-sm)',fontSize:13,background:'var(--bg)',color:'var(--text)',outline:'none',width:'100%'},
+  btnPrimary:{background:'var(--grad-primary)',color:'var(--surface)',border:'none',borderRadius:'var(--radius-sm)',padding:'7px 16px',fontSize:13,cursor:'pointer',fontWeight:500},
+  btnSecondary:{background:'var(--surface)',color:'#333',border:'1px solid var(--border)',borderRadius:'var(--radius-sm)',padding:'7px 14px',fontSize:13,cursor:'pointer'},
+  btnSmall:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:6,padding:'4px 10px',fontSize:12,cursor:'pointer',color:'#333'},
 }

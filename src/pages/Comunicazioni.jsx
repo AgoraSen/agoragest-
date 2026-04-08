@@ -202,9 +202,9 @@ export default function Comunicazioni() {
               <div key={t.id} style={{...s.tplCard,...(selectedTpl===t.id?s.tplCardActive:{})}} onClick={()=>setSelectedTpl(t.id)}>
                 <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:4}}>
                   <span style={{...s.badge,...TIPO_COLOR[t.tipo]}}>{TIPO_LABEL[t.tipo]}</span>
-                  <span style={{fontSize:14,fontWeight:500,color:'#1a1a1a'}}>{t.nome}</span>
+                  <span style={{fontSize:14,fontWeight:500,color:'var(--text)'}}>{t.nome}</span>
                 </div>
-                <div style={{fontSize:12,color:'#888',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{t.testo?.substring(0,70)}…</div>
+                <div style={{fontSize:12,color:'var(--text-secondary)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{t.testo?.substring(0,70)}…</div>
               </div>
             ))}
             <div style={s.field}>
@@ -228,14 +228,14 @@ export default function Comunicazioni() {
             <div style={{display:'flex',gap:8,marginBottom:6}}>
               <button style={s.btnSmall} onClick={()=>setSelectedCands(new Set(filteredCands.map(c=>c.id)))}>Seleziona tutti</button>
               <button style={s.btnSmall} onClick={()=>setSelectedCands(new Set())}>Deseleziona</button>
-              <span style={{fontSize:12,color:'#888',alignSelf:'center'}}>{selectedCands.size} selezionati</span>
+              <span style={{fontSize:12,color:'var(--text-secondary)',alignSelf:'center'}}>{selectedCands.size} selezionati</span>
             </div>
-            <div style={{maxHeight:220,overflowY:'auto',border:'0.5px solid #e8e5e0',borderRadius:8}}>
+            <div style={{maxHeight:220,overflowY:'auto',border:'1px solid var(--border)',borderRadius:'var(--radius-sm)'}}>
               {filteredCands.map(c=>(
-                <div key={c.id} style={{display:'flex',alignItems:'center',gap:8,padding:'6px 10px',borderBottom:'0.5px solid #f5f3ee',fontSize:13,cursor:'pointer'}} onClick={()=>{const ns=new Set(selectedCands);ns.has(c.id)?ns.delete(c.id):ns.add(c.id);setSelectedCands(ns)}}>
+                <div key={c.id} style={{display:'flex',alignItems:'center',gap:8,padding:'6px 10px',borderBottom:'1px solid var(--border-light)',fontSize:13,cursor:'pointer'}} onClick={()=>{const ns=new Set(selectedCands);ns.has(c.id)?ns.delete(c.id):ns.add(c.id);setSelectedCands(ns)}}>
                   <input type="checkbox" readOnly checked={selectedCands.has(c.id)} style={{width:14,height:14,flexShrink:0}}/>
                   <span style={{flex:1}}>{c.nome} {c.cognome}</span>
-                  <span style={{fontSize:11,color:'#aaa'}}>{c.tel||c.email||'—'}</span>
+                  <span style={{fontSize:11,color:'var(--text-muted)'}}>{c.tel||c.email||'—'}</span>
                 </div>
               ))}
             </div>
@@ -246,15 +246,15 @@ export default function Comunicazioni() {
 
           <div>
             <div style={s.sectionLabel}>Anteprima</div>
-            {tpl?.oggetto && <div style={{fontSize:12,color:'#888',marginBottom:6}}>Oggetto: {tpl.oggetto}</div>}
+            {tpl?.oggetto && <div style={{fontSize:12,color:'var(--text-secondary)',marginBottom:6}}>Oggetto: {tpl.oggetto}</div>}
             <div style={s.previewBox}>{previewTesto}</div>
-            <div style={{fontSize:11,color:'#aaa',marginTop:6}}>Anteprima con primo candidato in lista.</div>
+            <div style={{fontSize:11,color:'var(--text-muted)',marginTop:6}}>Anteprima con primo candidato in lista.</div>
             <div style={{marginTop:20}}>
               <div style={s.sectionLabel}>Statistiche oggi</div>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
                 {[['Inviati oggi',stats.oggi],['Totale log',stats.tot],['Consegnati',stats.cons]].map(([l,v])=>(
-                  <div key={l} style={{background:'#f5f4f0',borderRadius:8,padding:'10px 12px'}}>
-                    <div style={{fontSize:11,color:'#888'}}>{l}</div>
+                  <div key={l} style={{background:'var(--bg)',borderRadius:'var(--radius-sm)',padding:'10px 12px'}}>
+                    <div style={{fontSize:11,color:'var(--text-secondary)'}}>{l}</div>
                     <div style={{fontSize:22,fontWeight:600,color:'#1a3a5c'}}>{v}</div>
                   </div>
                 ))}
@@ -268,18 +268,18 @@ export default function Comunicazioni() {
       {tab==='template' && (
         <div>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}}>
-            <div style={{fontSize:13,color:'#888'}}>Variabili: <code style={{background:'#f0f7ff',padding:'1px 5px',borderRadius:4,fontSize:12}}>{'{{nome}} {{cognome}} {{cf}} {{data_appuntamento}} {{ora_appuntamento}} {{sala}} {{operatore}} {{nome_corso}}'}</code></div>
+            <div style={{fontSize:13,color:'var(--text-secondary)'}}>Variabili: <code style={{background:'#f0f7ff',padding:'1px 5px',borderRadius:4,fontSize:12}}>{'{{nome}} {{cognome}} {{cf}} {{data_appuntamento}} {{ora_appuntamento}} {{sala}} {{operatore}} {{nome_corso}}'}</code></div>
             <button style={s.btnPrimary} onClick={()=>{setEditTplId(null);setTplForm({tipo:'convocazione'});setShowTplModal(true)}}>+ Nuovo template</button>
           </div>
           {templates.map(t=>(
             <div key={t.id} style={s.card}>
               <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
                 <span style={{...s.badge,...TIPO_COLOR[t.tipo]}}>{TIPO_LABEL[t.tipo]}</span>
-                <span style={{fontSize:15,fontWeight:600,color:'#1a1a1a',flex:1}}>{t.nome}</span>
+                <span style={{fontSize:15,fontWeight:600,color:'var(--text)',flex:1}}>{t.nome}</span>
                 <button style={s.btnSmall} onClick={()=>{setEditTplId(t.id);setTplForm({nome:t.nome,tipo:t.tipo,oggetto:t.oggetto||'',testo:t.testo});setShowTplModal(true)}}>Modifica</button>
                 <button style={{...s.btnSmall,color:'#b91c1c'}} onClick={()=>deleteTpl(t.id)}>Elimina</button>
               </div>
-              {t.oggetto && <div style={{fontSize:12,color:'#888',marginBottom:4}}>Oggetto: {t.oggetto}</div>}
+              {t.oggetto && <div style={{fontSize:12,color:'var(--text-secondary)',marginBottom:4}}>Oggetto: {t.oggetto}</div>}
               <div style={s.previewBox}>{t.testo}</div>
             </div>
           ))}
@@ -298,22 +298,22 @@ export default function Comunicazioni() {
             </select>
             <button style={s.btnSuccess} onClick={exportLogCsv}>↓ CSV</button>
           </div>
-          <div style={{border:'0.5px solid #e8e5e0',borderRadius:12,overflow:'hidden'}}>
-            <div style={{display:'grid',gridTemplateColumns:'130px 1fr 90px 70px 70px',gap:6,padding:'8px 12px',background:'#fafaf8',fontSize:11,color:'#888'}}>
+          <div style={{border:'1px solid var(--border)',borderRadius:'var(--radius)',overflow:'hidden'}}>
+            <div style={{display:'grid',gridTemplateColumns:'130px 1fr 90px 70px 70px',gap:6,padding:'8px 12px',background:'var(--bg)',fontSize:11,color:'var(--text-secondary)'}}>
               <div>Data e ora</div><div>Candidato</div><div>Template</div><div>Canale</div><div>Stato</div>
             </div>
             <div style={{maxHeight:400,overflowY:'auto'}}>
               {filteredLog.length === 0
-                ? <div style={{padding:20,textAlign:'center',fontSize:13,color:'#aaa'}}>Nessun invio registrato.</div>
+                ? <div style={{padding:20,textAlign:'center',fontSize:13,color:'var(--text-muted)'}}>Nessun invio registrato.</div>
                 : filteredLog.map(l=>(
                   <div key={l.id} style={{display:'grid',gridTemplateColumns:'130px 1fr 90px 70px 70px',gap:6,padding:'8px 12px',borderTop:'0.5px solid #f5f3ee',fontSize:12,alignItems:'center',cursor:'pointer'}}
                     onClick={()=>{
                       setRicevutaTxt(`RICEVUTA — AGORÀ\n${'─'.repeat(40)}\nData: ${fmtTs(l.created_at)}\nOperatore: ${l.operatore_nome}\nCanale: ${l.canale?.toUpperCase()}\nTemplate: ${l.template_nome}\n${'─'.repeat(40)}\nDestinatario: ${l.candidato_nome}\nCF: ${l.candidato_cf}\nStato: ${l.stato}\n${l.oggetto?'Oggetto: '+l.oggetto+'\n':''}\nTesto:\n"${l.testo}"\n${'─'.repeat(40)}\nFine ricevuta`)
                       setShowRicevuta(true)
                     }}>
-                    <div style={{color:'#888'}}>{fmtTs(l.created_at)}</div>
-                    <div><strong>{l.candidato_nome}</strong><br/><span style={{color:'#aaa'}}>{l.candidato_cf}</span></div>
-                    <div style={{color:'#888',fontSize:11}}>{l.template_nome?.substring(0,20)}</div>
+                    <div style={{color:'var(--text-secondary)'}}>{fmtTs(l.created_at)}</div>
+                    <div><strong>{l.candidato_nome}</strong><br/><span style={{color:'var(--text-muted)'}}>{l.candidato_cf}</span></div>
+                    <div style={{color:'var(--text-secondary)',fontSize:11}}>{l.template_nome?.substring(0,20)}</div>
                     <div><span style={{...s.badge,...(l.canale==='sms'?{bg:'#FAEEDA',color:'#633806'}:{bg:'#E6F1FB',color:'#0C447C'})}}>{l.canale?.toUpperCase()}</span></div>
                     <div><span style={{...s.badge,...(l.stato==='Inviato'?{bg:'#EAF3DE',color:'#27500A'}:{bg:'#FCEBEB',color:'#791F1F'})}}>{l.stato}</span></div>
                   </div>
@@ -321,7 +321,7 @@ export default function Comunicazioni() {
               }
             </div>
           </div>
-          <div style={{fontSize:12,color:'#888',marginTop:8}}>{filteredLog.length} invii nel log</div>
+          <div style={{fontSize:12,color:'var(--text-secondary)',marginTop:8}}>{filteredLog.length} invii nel log</div>
         </div>
       )}
 
@@ -351,7 +351,7 @@ export default function Comunicazioni() {
           <div>
             <div style={s.sectionLabel}>Anteprima</div>
             <div style={s.previewBox}>{nlPreview||'Clicca "Anteprima" per vedere il testo compilato.'}</div>
-            <div style={{fontSize:12,color:'#888',marginTop:8}}>
+            <div style={{fontSize:12,color:'var(--text-secondary)',marginTop:8}}>
               Destinatari con email: {candidati.filter(c=>c.email&&(nlForm.gruppo==='tutti'||c.stato==={attesa:'In attesa',formazione:'In formazione',collocato:'Collocato'}[nlForm.gruppo])).length} candidati
             </div>
           </div>
@@ -364,7 +364,7 @@ export default function Comunicazioni() {
           <div style={s.overlay} onClick={()=>setShowSendModal(false)}/>
           <div style={s.modal}>
             <h3 style={s.modalTitle}>Conferma invio</h3>
-            <div style={{background:'#f5f4f0',borderRadius:8,padding:'10px 12px',fontSize:13,color:'#555',marginBottom:4}}>
+            <div style={{background:'var(--bg)',borderRadius:'var(--radius-sm)',padding:'10px 12px',fontSize:13,color:'#555',marginBottom:4}}>
               <strong>Template:</strong> {tpl?.nome}<br/>
               <strong>Canale:</strong> {canale.toUpperCase()}<br/>
               <strong>Destinatari:</strong> {selectedCands.size} candidati
@@ -439,26 +439,26 @@ export default function Comunicazioni() {
 const s = {
   wrap: { maxWidth:1080, margin:'0 auto' },
   topbar: { display:'flex', alignItems:'center', gap:8, marginBottom:'1rem' },
-  title: { fontSize:20, fontWeight:600, color:'#1a1a1a', margin:0 },
+  title: { fontSize:20, fontWeight:600, color:'var(--text)', margin:0 },
   tabs: { display:'flex', gap:4, marginBottom:'1.25rem', flexWrap:'wrap' },
-  tab: { padding:'5px 16px', border:'0.5px solid #e8e5e0', borderRadius:20, fontSize:13, cursor:'pointer', color:'#888' },
-  tabActive: { background:'#1a3a5c', color:'#fff', borderColor:'#1a3a5c' },
+  tab: { padding:'5px 16px', border:'1px solid var(--border)', borderRadius:20, fontSize:13, cursor:'pointer', color:'var(--text-secondary)' },
+  tabActive: { background:'var(--grad-primary)', color:'var(--surface)', borderColor:'#1a3a5c' },
   grid2: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1.25rem' },
-  sectionLabel: { fontSize:13, fontWeight:600, color:'#1a1a1a', marginBottom:8 },
-  tplCard: { background:'#fff', border:'0.5px solid #e8e5e0', borderRadius:8, padding:'10px 12px', marginBottom:8, cursor:'pointer' },
+  sectionLabel: { fontSize:13, fontWeight:600, color:'var(--text)', marginBottom:8 },
+  tplCard: { background:'var(--surface)', border:'1px solid var(--border)', borderRadius:'var(--radius-sm)', padding:'10px 12px', marginBottom:8, cursor:'pointer' },
   tplCardActive: { borderColor:'#1a3a5c', background:'#f0f7ff' },
-  card: { background:'#fff', border:'0.5px solid #e8e5e0', borderRadius:12, padding:'1rem 1.25rem', marginBottom:10 },
-  previewBox: { background:'#f5f4f0', borderRadius:8, padding:'10px 12px', fontSize:13, color:'#1a1a1a', whiteSpace:'pre-wrap', lineHeight:1.6, border:'0.5px solid #e8e5e0', minHeight:60 },
+  card: { background:'var(--surface)', border:'1px solid var(--border)', borderRadius:'var(--radius)', padding:'1rem 1.25rem', marginBottom:10 },
+  previewBox: { background:'var(--bg)', borderRadius:'var(--radius-sm)', padding:'10px 12px', fontSize:13, color:'var(--text)', whiteSpace:'pre-wrap', lineHeight:1.6, border:'1px solid var(--border)', minHeight:60 },
   badge: { display:'inline-block', fontSize:11, padding:'2px 8px', borderRadius:20 },
   field: { display:'flex', flexDirection:'column', gap:4, marginBottom:10 },
-  label: { fontSize:12, color:'#888' },
-  input: { padding:'8px 10px', border:'0.5px solid #d8d5ce', borderRadius:8, fontSize:13, background:'#fafaf8', color:'#1a1a1a', outline:'none', width:'100%' },
+  label: { fontSize:12, color:'var(--text-secondary)' },
+  input: { padding:'8px 10px', border:'1px solid var(--border)', borderRadius:'var(--radius-sm)', fontSize:13, background:'var(--bg)', color:'var(--text)', outline:'none', width:'100%' },
   overlay: { position:'fixed', inset:0, background:'rgba(0,0,0,0.18)', zIndex:20 },
-  modal: { position:'fixed', top:'50%', left:'50%', transform:'translate(-50%,-50%)', background:'#fff', border:'0.5px solid #e8e5e0', borderRadius:14, padding:'1.5rem', zIndex:30, width:'min(500px,96vw)', maxHeight:'92vh', overflowY:'auto', display:'flex', flexDirection:'column', gap:10 },
-  modalTitle: { fontSize:16, fontWeight:600, color:'#1a1a1a', margin:0 },
+  modal: { position:'fixed', top:'50%', left:'50%', transform:'translate(-50%,-50%)', background:'var(--surface)', border:'1px solid var(--border)', borderRadius:'var(--radius-lg)', padding:'1.5rem', zIndex:30, width:'min(500px,96vw)', maxHeight:'92vh', overflowY:'auto', display:'flex', flexDirection:'column', gap:10 },
+  modalTitle: { fontSize:16, fontWeight:600, color:'var(--text)', margin:0 },
   modalActions: { display:'flex', gap:8, justifyContent:'flex-end', marginTop:4 },
-  btnPrimary: { background:'#1a3a5c', color:'#fff', border:'none', borderRadius:8, padding:'7px 16px', fontSize:13, cursor:'pointer', fontWeight:500 },
-  btnSecondary: { background:'#fff', color:'#333', border:'0.5px solid #d8d5ce', borderRadius:8, padding:'7px 14px', fontSize:13, cursor:'pointer' },
-  btnSuccess: { background:'#EAF3DE', color:'#27500A', border:'0.5px solid #27500A', borderRadius:8, padding:'7px 14px', fontSize:13, cursor:'pointer' },
-  btnSmall: { background:'#fff', border:'0.5px solid #d8d5ce', borderRadius:6, padding:'4px 10px', fontSize:12, cursor:'pointer', color:'#333' },
+  btnPrimary: { background:'var(--grad-primary)', color:'var(--surface)', border:'none', borderRadius:'var(--radius-sm)', padding:'7px 16px', fontSize:13, cursor:'pointer', fontWeight:500 },
+  btnSecondary: { background:'var(--surface)', color:'#333', border:'1px solid var(--border)', borderRadius:'var(--radius-sm)', padding:'7px 14px', fontSize:13, cursor:'pointer' },
+  btnSuccess: { background:'#EAF3DE', color:'#27500A', border:'0.5px solid #27500A', borderRadius:'var(--radius-sm)', padding:'7px 14px', fontSize:13, cursor:'pointer' },
+  btnSmall: { background:'var(--surface)', border:'1px solid var(--border)', borderRadius:6, padding:'4px 10px', fontSize:12, cursor:'pointer', color:'#333' },
 }

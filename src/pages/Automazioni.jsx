@@ -208,7 +208,7 @@ export default function Automazioni() {
         </div>
       </div>
 
-      <div style={{background:'#f0f7ff',border:'0.5px solid #bdd6ee',borderRadius:8,padding:'10px 14px',fontSize:13,color:'#1a3a5c',marginBottom:'1.25rem'}}>
+      <div style={{background:'#f0f7ff',border:'0.5px solid #bdd6ee',borderRadius:'var(--radius-sm)',padding:'10px 14px',fontSize:13,color:'#1a3a5c',marginBottom:'1.25rem'}}>
         ℹ️ Le automazioni <strong>simulano</strong> l'invio e registrano tutto nel log. Per attivare SMS/email reali è necessario collegare un provider (Twilio, eSendex, ecc.). Contatta il supporto per l'integrazione.
       </div>
 
@@ -221,9 +221,9 @@ export default function Automazioni() {
       {/* REGOLE */}
       {tab==='regole' && (
         <div>
-          {loading ? <div style={{color:'#aaa',padding:16}}>Caricamento...</div>
+          {loading ? <div style={{color:'var(--text-muted)',padding:16}}>Caricamento...</div>
           : regole.length === 0 ? (
-            <div style={{textAlign:'center',padding:'3rem',color:'#aaa'}}>
+            <div style={{textAlign:'center',padding:'3rem',color:'var(--text-muted)'}}>
               <div style={{fontSize:32,marginBottom:8}}>⚡</div>
               <div>Nessuna regola configurata. Creane una!</div>
             </div>
@@ -233,8 +233,8 @@ export default function Automazioni() {
                 <div style={{fontSize:28,flexShrink:0}}>{TIPI_AUTO[r.tipo]?.icon||'⚡'}</div>
                 <div style={{flex:1}}>
                   <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4,flexWrap:'wrap'}}>
-                    <span style={{fontSize:15,fontWeight:600,color:'#1a1a1a'}}>{r.nome}</span>
-                    <span style={{fontSize:11,padding:'2px 8px',borderRadius:20,background:r.attiva?'#EAF3DE':'#F1EFE8',color:r.attiva?'#27500A':'#888'}}>
+                    <span style={{fontSize:15,fontWeight:600,color:'var(--text)'}}>{r.nome}</span>
+                    <span style={{fontSize:11,padding:'2px 8px',borderRadius:20,background:r.attiva?'#EAF3DE':'#F1EFE8',color:r.attiva?'#27500A':'var(--text-secondary)'}}>
                       {r.attiva?'Attiva':'Disattivata'}
                     </span>
                     <span style={{fontSize:11,padding:'2px 8px',borderRadius:20,background:'#f0ede8',color:'#555'}}>
@@ -242,13 +242,13 @@ export default function Automazioni() {
                     </span>
                     {r.canale&&<span style={{fontSize:11,padding:'2px 8px',borderRadius:20,background:'#E6F1FB',color:'#0C447C'}}>{r.canale.toUpperCase()}</span>}
                   </div>
-                  <div style={{fontSize:12,color:'#888'}}>
+                  <div style={{fontSize:12,color:'var(--text-secondary)'}}>
                     {r.tipo==='promemoria_appt'&&'Invia promemoria il giorno prima degli appuntamenti'}
                     {r.tipo==='candidato_inattivo'&&`Avvisa candidati inattivi da più di ${r.giorni_inattivita||30} giorni`}
                     {r.tipo==='offerta_scadenza'&&`Avvisa ${r.giorni_anticipo||7} giorni prima della scadenza offerte`}
                     {r.tipo==='cambio_stato'&&`Invia messaggio quando un candidato passa allo stato "${r.stato_trigger||'...'}"`}
                     {r.tipo==='sequenza'&&`Sequenza di ${r.sequenza_steps||1} messaggi`}
-                    {r.note&&<span style={{marginLeft:8,color:'#aaa'}}>— {r.note}</span>}
+                    {r.note&&<span style={{marginLeft:8,color:'var(--text-muted)'}}>— {r.note}</span>}
                   </div>
                 </div>
                 <div style={{display:'flex',gap:6,flexShrink:0,flexWrap:'wrap'}}>
@@ -273,22 +273,22 @@ export default function Automazioni() {
         <div>
           <div style={{display:'flex',gap:8,marginBottom:12,alignItems:'center'}}>
             <input style={{...s.input,flex:1,maxWidth:300}} placeholder="Cerca nel log..." value={logFilter} onChange={e=>setLogFilter(e.target.value)}/>
-            <span style={{fontSize:12,color:'#888'}}>{filteredLog.length} esecuzioni</span>
+            <span style={{fontSize:12,color:'var(--text-secondary)'}}>{filteredLog.length} esecuzioni</span>
           </div>
-          {filteredLog.length===0?<div style={{color:'#aaa',fontSize:13,padding:16}}>Nessuna esecuzione registrata.</div>
-          :<div style={{border:'0.5px solid #e8e5e0',borderRadius:12,overflow:'hidden'}}>
-            <div style={{display:'grid',gridTemplateColumns:'140px 1fr 120px 80px 80px',gap:6,padding:'8px 12px',background:'#fafaf8',fontSize:11,color:'#888'}}>
+          {filteredLog.length===0?<div style={{color:'var(--text-muted)',fontSize:13,padding:16}}>Nessuna esecuzione registrata.</div>
+          :<div style={{border:'1px solid var(--border)',borderRadius:'var(--radius)',overflow:'hidden'}}>
+            <div style={{display:'grid',gridTemplateColumns:'140px 1fr 120px 80px 80px',gap:6,padding:'8px 12px',background:'var(--bg)',fontSize:11,color:'var(--text-secondary)'}}>
               <div>Data e ora</div><div>Candidato / Oggetto</div><div>Regola</div><div>Canale</div><div>Stato</div>
             </div>
             <div style={{maxHeight:450,overflowY:'auto'}}>
               {filteredLog.map(l=>(
                 <div key={l.id} style={{display:'grid',gridTemplateColumns:'140px 1fr 120px 80px 80px',gap:6,padding:'8px 12px',borderTop:'0.5px solid #f5f3ee',fontSize:12,alignItems:'center'}}>
-                  <div style={{color:'#888',fontSize:11}}>{fmtTs(l.created_at)}</div>
+                  <div style={{color:'var(--text-secondary)',fontSize:11}}>{fmtTs(l.created_at)}</div>
                   <div>
                     <div style={{fontWeight:500}}>{l.candidato_nome}</div>
-                    <div style={{fontSize:11,color:'#aaa',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{l.testo?.substring(0,60)}...</div>
+                    <div style={{fontSize:11,color:'var(--text-muted)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{l.testo?.substring(0,60)}...</div>
                   </div>
-                  <div style={{fontSize:11,color:'#888'}}>{l.template_nome?.substring(0,20)}</div>
+                  <div style={{fontSize:11,color:'var(--text-secondary)'}}>{l.template_nome?.substring(0,20)}</div>
                   <div><span style={{fontSize:11,padding:'2px 6px',borderRadius:10,background:'#E6F1FB',color:'#0C447C'}}>{l.canale?.toUpperCase()}</span></div>
                   <div><span style={{fontSize:11,color:'#27500A'}}>{l.stato}</span></div>
                 </div>
@@ -309,7 +309,7 @@ export default function Automazioni() {
               <div style={{fontSize:28,flexShrink:0}}>{t.icon}</div>
               <div>
                 <div style={{fontSize:14,fontWeight:600,marginBottom:4}}>{t.label}</div>
-                <div style={{fontSize:13,color:'#888'}}>{t.desc}</div>
+                <div style={{fontSize:13,color:'var(--text-secondary)'}}>{t.desc}</div>
                 {key==='cambio_stato'&&<div style={{fontSize:12,color:'#1a3a5c',marginTop:4}}>→ Si attiva in tempo reale quando salvi un candidato con un nuovo stato</div>}
                 {key==='promemoria_appt'&&<div style={{fontSize:12,color:'#1a3a5c',marginTop:4}}>→ Esegui ogni giorno mattina per inviare promemoria del giorno successivo</div>}
                 {key==='candidato_inattivo'&&<div style={{fontSize:12,color:'#1a3a5c',marginTop:4}}>→ Esegui periodicamente per identificare candidati che non vengono contattati</div>}
@@ -318,7 +318,7 @@ export default function Automazioni() {
               </div>
             </div>
           ))}
-          <div style={{...s.card,background:'#fafaf8',marginTop:'1.5rem'}}>
+          <div style={{...s.card,background:'var(--bg)',marginTop:'1.5rem'}}>
             <div style={{fontSize:13,fontWeight:600,marginBottom:8}}>Per attivare SMS/email reali:</div>
             <div style={{fontSize:12,color:'#555',lineHeight:1.8}}>
               1. Scegli un provider SMS (Twilio, eSendex, SMSHOSTING, ecc.)<br/>
@@ -345,7 +345,7 @@ export default function Automazioni() {
                 {Object.entries(TIPI_AUTO).map(([k,t])=><option key={k} value={k}>{t.icon} {t.label}</option>)}
               </select>
             </div>
-            {form.tipo && <div style={{background:'#f5f4f0',borderRadius:8,padding:'8px 12px',fontSize:12,color:'#555'}}>{TIPI_AUTO[form.tipo]?.desc}</div>}
+            {form.tipo && <div style={{background:'var(--bg)',borderRadius:'var(--radius-sm)',padding:'8px 12px',fontSize:12,color:'#555'}}>{TIPI_AUTO[form.tipo]?.desc}</div>}
             <div style={s.field}><label style={s.label}>Canale</label>
               <select style={s.input} value={form.canale||'sms'} onChange={e=>setForm(f=>({...f,canale:e.target.value}))}>
                 <option value="sms">SMS</option>
@@ -399,19 +399,19 @@ export default function Automazioni() {
 const s = {
   wrap:{maxWidth:1000,margin:'0 auto'},
   topbar:{display:'flex',alignItems:'center',gap:8,marginBottom:'1rem',flexWrap:'wrap'},
-  title:{fontSize:20,fontWeight:600,color:'#1a1a1a',flex:1,margin:0},
+  title:{fontSize:20,fontWeight:600,color:'var(--text)',flex:1,margin:0},
   tabs:{display:'flex',gap:4,marginBottom:'1.25rem'},
-  tab:{padding:'5px 16px',border:'0.5px solid #e8e5e0',borderRadius:20,fontSize:13,cursor:'pointer',color:'#888'},
-  tabActive:{background:'#1a3a5c',color:'#fff',borderColor:'#1a3a5c'},
-  card:{background:'#fff',border:'0.5px solid #e8e5e0',borderRadius:12,padding:'1rem 1.25rem'},
+  tab:{padding:'5px 16px',border:'1px solid var(--border)',borderRadius:20,fontSize:13,cursor:'pointer',color:'var(--text-secondary)'},
+  tabActive:{background:'var(--grad-primary)',color:'var(--surface)',borderColor:'#1a3a5c'},
+  card:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'1rem 1.25rem'},
   overlay:{position:'fixed',inset:0,background:'rgba(0,0,0,0.18)',zIndex:20},
-  modal:{position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'#fff',border:'0.5px solid #e8e5e0',borderRadius:14,padding:'1.5rem',zIndex:30,width:'min(500px,96vw)',maxHeight:'92vh',overflowY:'auto',display:'flex',flexDirection:'column',gap:10},
-  modalTitle:{fontSize:16,fontWeight:600,color:'#1a1a1a',margin:0},
+  modal:{position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius-lg)',padding:'1.5rem',zIndex:30,width:'min(500px,96vw)',maxHeight:'92vh',overflowY:'auto',display:'flex',flexDirection:'column',gap:10},
+  modalTitle:{fontSize:16,fontWeight:600,color:'var(--text)',margin:0},
   modalActions:{display:'flex',gap:8,justifyContent:'flex-end',marginTop:4},
   field:{display:'flex',flexDirection:'column',gap:4},
-  label:{fontSize:12,color:'#888'},
-  input:{padding:'8px 10px',border:'0.5px solid #d8d5ce',borderRadius:8,fontSize:13,background:'#fafaf8',color:'#1a1a1a',outline:'none',width:'100%'},
-  btnPrimary:{background:'#1a3a5c',color:'#fff',border:'none',borderRadius:8,padding:'7px 16px',fontSize:13,cursor:'pointer',fontWeight:500},
-  btnSecondary:{background:'#fff',color:'#333',border:'0.5px solid #d8d5ce',borderRadius:8,padding:'7px 14px',fontSize:13,cursor:'pointer'},
-  btnSmall:{background:'#fff',border:'0.5px solid #d8d5ce',borderRadius:6,padding:'4px 10px',fontSize:12,cursor:'pointer',color:'#333'},
+  label:{fontSize:12,color:'var(--text-secondary)'},
+  input:{padding:'8px 10px',border:'1px solid var(--border)',borderRadius:'var(--radius-sm)',fontSize:13,background:'var(--bg)',color:'var(--text)',outline:'none',width:'100%'},
+  btnPrimary:{background:'var(--grad-primary)',color:'var(--surface)',border:'none',borderRadius:'var(--radius-sm)',padding:'7px 16px',fontSize:13,cursor:'pointer',fontWeight:500},
+  btnSecondary:{background:'var(--surface)',color:'#333',border:'1px solid var(--border)',borderRadius:'var(--radius-sm)',padding:'7px 14px',fontSize:13,cursor:'pointer'},
+  btnSmall:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:6,padding:'4px 10px',fontSize:12,cursor:'pointer',color:'#333'},
 }

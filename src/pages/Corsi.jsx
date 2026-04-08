@@ -245,18 +245,18 @@ export default function Corsi() {
               </select>
             </div>
           </div>
-          <div style={{fontSize:12,color:'#888',marginBottom:8}}>{filtered.length} corsi</div>
+          <div style={{fontSize:12,color:'var(--text-secondary)',marginBottom:8}}>{filtered.length} corsi</div>
           <div style={{overflowY:'auto',maxHeight:'calc(100vh - 300px)'}}>
-            {loading?<div style={{color:'#aaa',fontSize:13,padding:12}}>Caricamento...</div>
-            :filtered.length===0?<div style={{color:'#aaa',fontSize:13,padding:12}}>Nessun corso trovato.</div>
+            {loading?<div style={{color:'var(--text-muted)',fontSize:13,padding:12}}>Caricamento...</div>
+            :filtered.length===0?<div style={{color:'var(--text-muted)',fontSize:13,padding:12}}>Nessun corso trovato.</div>
             :filtered.map(c=>(
               <div key={c.id} style={{...s.corsoCard,...(selected?.id===c.id?s.corsoCardActive:{})}} onClick={()=>{setSelected(c);setTab('info')}}>
                 <div style={{display:'flex',gap:6,alignItems:'flex-start',marginBottom:4}}>
                   <span style={{...s.badge,...(TIPI_COLOR[c.tipo]||TIPI_COLOR.altro),flexShrink:0}}>{TIPI[c.tipo]||c.tipo}</span>
                   <span style={{...s.badge,...(STATI_COLOR[c.stato]||STATI_COLOR.programmato),flexShrink:0}}>{STATI[c.stato]||c.stato}</span>
                 </div>
-                <div style={{fontSize:14,fontWeight:600,color:'#1a1a1a',marginBottom:2}}>{c.nome}</div>
-                <div style={{fontSize:12,color:'#888'}}>
+                <div style={{fontSize:14,fontWeight:600,color:'var(--text)',marginBottom:2}}>{c.nome}</div>
+                <div style={{fontSize:12,color:'var(--text-secondary)'}}>
                   {c.codice&&<span style={{marginRight:6,fontFamily:'monospace'}}>{c.codice} ·</span>}
                   {c.data_inizio&&fmtIt(c.data_inizio)}{c.data_fine&&` → ${fmtIt(c.data_fine)}`}
                   {c.sede&&<span style={{marginLeft:6}}>· {c.sede}</span>}
@@ -269,7 +269,7 @@ export default function Corsi() {
         {/* Dettaglio */}
         <div style={s.detail}>
           {!selected?(
-            <div style={{padding:'3rem',textAlign:'center',color:'#aaa'}}>
+            <div style={{padding:'3rem',textAlign:'center',color:'var(--text-muted)'}}>
               <div style={{fontSize:32,marginBottom:8}}>📚</div>
               <div style={{fontSize:14}}>Seleziona un corso dalla lista</div>
             </div>
@@ -281,8 +281,8 @@ export default function Corsi() {
                     <span style={{...s.badge,...(TIPI_COLOR[selected.tipo]||TIPI_COLOR.altro)}}>{TIPI[selected.tipo]||selected.tipo}</span>
                     <span style={{...s.badge,...(STATI_COLOR[selected.stato]||STATI_COLOR.programmato)}}>{STATI[selected.stato]||selected.stato}</span>
                   </div>
-                  <h3 style={{fontSize:18,fontWeight:700,color:'#1a1a1a',margin:0}}>{selected.nome}</h3>
-                  <div style={{fontSize:13,color:'#888',marginTop:4,display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <h3 style={{fontSize:18,fontWeight:700,color:'var(--text)',margin:0}}>{selected.nome}</h3>
+                  <div style={{fontSize:13,color:'var(--text-secondary)',marginTop:4,display:'flex',gap:12,flexWrap:'wrap'}}>
                     {selected.data_inizio&&<span>📅 {fmtIt(selected.data_inizio)} → {fmtIt(selected.data_fine)}</span>}
                     {selected.sede&&<span>📍 {selected.sede}</span>}
                     {selected.ore_totali&&<span>⏱ {selected.ore_totali}h</span>}
@@ -298,7 +298,7 @@ export default function Corsi() {
               <div style={s.tabs}>
                 {[['info','Info'],['docenti','Docenti'],['sessioni','Sessioni'],['iscritti','Iscritti'],['presenze','Presenze']].map(([id,label])=>(
                   <div key={id} style={{...s.tab,...(tab===id?s.tabActive:{})}} onClick={()=>setTab(id)}>{label}
-                    {id==='iscritti'&&iscrizioni.length>0&&<span style={{marginLeft:4,background:'#1a3a5c',color:'#fff',borderRadius:10,padding:'0 5px',fontSize:10}}>{iscrizioni.length}</span>}
+                    {id==='iscritti'&&iscrizioni.length>0&&<span style={{marginLeft:4,background:'var(--grad-primary)',color:'var(--surface)',borderRadius:10,padding:'0 5px',fontSize:10}}>{iscrizioni.length}</span>}
                   </div>
                 ))}
               </div>
@@ -333,13 +333,13 @@ export default function Corsi() {
                   <div style={{display:'flex',justifyContent:'flex-end',marginBottom:12}}>
                     <button style={s.btnPrimary} onClick={()=>{setDocenteForm({});setShowDocenteModal(true)}}>+ Aggiungi docente</button>
                   </div>
-                  {docenti.length===0?<div style={{fontSize:13,color:'#aaa',padding:'1rem'}}>Nessun docente assegnato.</div>
+                  {docenti.length===0?<div style={{fontSize:13,color:'var(--text-muted)',padding:'1rem'}}>Nessun docente assegnato.</div>
                   :docenti.map(d=>(
                     <div key={d.id} style={{...s.card,marginBottom:8,display:'flex',gap:12,alignItems:'flex-start'}}>
-                      <div style={{width:36,height:36,borderRadius:'50%',background:'#1a3a5c',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:600,flexShrink:0}}>{d.nome?.[0]}{d.cognome?.[0]}</div>
+                      <div style={{width:36,height:36,borderRadius:'50%',background:'var(--grad-primary)',color:'var(--surface)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:600,flexShrink:0}}>{d.nome?.[0]}{d.cognome?.[0]}</div>
                       <div style={{flex:1}}>
                         <div style={{fontSize:14,fontWeight:600}}>{d.nome} {d.cognome}</div>
-                        {d.specializzazione&&<div style={{fontSize:12,color:'#888'}}>{d.specializzazione}</div>}
+                        {d.specializzazione&&<div style={{fontSize:12,color:'var(--text-secondary)'}}>{d.specializzazione}</div>}
                         <div style={{display:'flex',gap:12,marginTop:4,flexWrap:'wrap'}}>
                           {d.email&&<span style={{fontSize:12,color:'#555'}}>✉️ {d.email}</span>}
                           {d.telefono&&<span style={{fontSize:12,color:'#555'}}>📞 {d.telefono}</span>}
@@ -358,22 +358,22 @@ export default function Corsi() {
               {tab==='sessioni'&&(
                 <div>
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
-                    <span style={{fontSize:13,color:'#888'}}>{sessioni.length} sessioni · {oreSessioni().toFixed(1)}h totali</span>
+                    <span style={{fontSize:13,color:'var(--text-secondary)'}}>{sessioni.length} sessioni · {oreSessioni().toFixed(1)}h totali</span>
                     <button style={s.btnPrimary} onClick={()=>{setSessioneForm({});setShowSessioneModal(true)}}>+ Aggiungi sessione</button>
                   </div>
-                  {sessioni.length===0?<div style={{fontSize:13,color:'#aaa',padding:'1rem'}}>Nessuna sessione programmata.</div>
+                  {sessioni.length===0?<div style={{fontSize:13,color:'var(--text-muted)',padding:'1rem'}}>Nessuna sessione programmata.</div>
                   :sessioni.map(s2=>{
                     const ore = s2.ora_inizio&&s2.ora_fine?((parseInt(s2.ora_fine)-parseInt(s2.ora_inizio))).toString():null
                     return(
                       <div key={s2.id} style={{...s.card,marginBottom:8,display:'flex',gap:12,alignItems:'center'}}>
                         <div style={{textAlign:'center',minWidth:48}}>
                           <div style={{fontSize:18,fontWeight:700,color:'#1a3a5c'}}>{s2.data?.slice(8,10)}</div>
-                          <div style={{fontSize:11,color:'#888'}}>{new Date(s2.data+'T12:00:00').toLocaleDateString('it-IT',{month:'short'})}</div>
+                          <div style={{fontSize:11,color:'var(--text-secondary)'}}>{new Date(s2.data+'T12:00:00').toLocaleDateString('it-IT',{month:'short'})}</div>
                         </div>
                         <div style={{flex:1}}>
                           <div style={{fontSize:13,fontWeight:500}}>{s2.ora_inizio?.slice(0,5)}–{s2.ora_fine?.slice(0,5)}</div>
-                          {s2.sede&&<div style={{fontSize:12,color:'#888'}}>{s2.sede}</div>}
-                          {s2.note&&<div style={{fontSize:12,color:'#aaa'}}>{s2.note}</div>}
+                          {s2.sede&&<div style={{fontSize:12,color:'var(--text-secondary)'}}>{s2.sede}</div>}
+                          {s2.note&&<div style={{fontSize:12,color:'var(--text-muted)'}}>{s2.note}</div>}
                         </div>
                         <div style={{display:'flex',gap:6}}>
                           <button style={s.btnSmall} onClick={()=>openPresenze(s2)}>👥 Presenze</button>
@@ -390,18 +390,18 @@ export default function Corsi() {
               {tab==='iscritti'&&(
                 <div>
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
-                    <span style={{fontSize:13,color:'#888'}}>{iscrizioni.length}{selected.max_partecipanti?` / ${selected.max_partecipanti}`:''} iscritti</span>
+                    <span style={{fontSize:13,color:'var(--text-secondary)'}}>{iscrizioni.length}{selected.max_partecipanti?` / ${selected.max_partecipanti}`:''} iscritti</span>
                     <button style={s.btnPrimary} onClick={()=>{setCandSearch('');setCandSuggests([]);setShowIscrizioneModal(true)}}>+ Iscrivi candidato</button>
                   </div>
-                  {iscrizioni.length===0?<div style={{fontSize:13,color:'#aaa',padding:'1rem'}}>Nessun iscritto.</div>
+                  {iscrizioni.length===0?<div style={{fontSize:13,color:'var(--text-muted)',padding:'1rem'}}>Nessun iscritto.</div>
                   :iscrizioni.map(i=>(
                     <div key={i.id} style={{...s.card,marginBottom:8,display:'flex',gap:12,alignItems:'center'}}>
-                      <div style={{width:34,height:34,borderRadius:'50%',background:'#1a3a5c',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:600,flexShrink:0}}>
+                      <div style={{width:34,height:34,borderRadius:'50%',background:'var(--grad-primary)',color:'var(--surface)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:600,flexShrink:0}}>
                         {i.candidati?.nome?.[0]}{i.candidati?.cognome?.[0]}
                       </div>
                       <div style={{flex:1}}>
                         <div style={{fontSize:14,fontWeight:600}}>{i.candidati?.nome} {i.candidati?.cognome}</div>
-                        <div style={{fontSize:12,color:'#888'}}>{i.candidati?.cf}</div>
+                        <div style={{fontSize:12,color:'var(--text-secondary)'}}>{i.candidati?.cf}</div>
                       </div>
                       <div style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap'}}>
                         <select style={{...s.input,width:'auto',fontSize:12,padding:'3px 8px'}} value={i.stato} onChange={e=>updateIscrizione(i.id,{stato:e.target.value})}>
@@ -421,8 +421,8 @@ export default function Corsi() {
               {/* PRESENZE RIEPILOGO */}
               {tab==='presenze'&&(
                 <div>
-                  {sessioni.length===0?<div style={{fontSize:13,color:'#aaa',padding:'1rem'}}>Nessuna sessione — aggiungi sessioni per registrare le presenze.</div>
-                  :iscrizioni.length===0?<div style={{fontSize:13,color:'#aaa',padding:'1rem'}}>Nessun iscritto — iscrivi candidati per registrare le presenze.</div>
+                  {sessioni.length===0?<div style={{fontSize:13,color:'var(--text-muted)',padding:'1rem'}}>Nessuna sessione — aggiungi sessioni per registrare le presenze.</div>
+                  :iscrizioni.length===0?<div style={{fontSize:13,color:'var(--text-muted)',padding:'1rem'}}>Nessun iscritto — iscrivi candidati per registrare le presenze.</div>
                   :(
                     <div style={{overflowX:'auto'}}>
                       <table style={{...s.table,minWidth:400}}>
@@ -566,12 +566,12 @@ export default function Corsi() {
                 <div style={s.suggest}>
                   {candSuggests.map(c=>(
                     <div key={c.id} style={s.suggestItem} onMouseDown={()=>addIscrizione(c.id)}>
-                      {c.nome} {c.cognome} <span style={{color:'#aaa',fontSize:11}}>{c.cf}</span>
+                      {c.nome} {c.cognome} <span style={{color:'var(--text-muted)',fontSize:11}}>{c.cf}</span>
                     </div>
                   ))}
                 </div>
               )}
-              {candSearch&&candSuggests.length===0&&<div style={{fontSize:12,color:'#aaa',padding:'8px 10px'}}>Nessun candidato trovato (o già iscritto)</div>}
+              {candSearch&&candSuggests.length===0&&<div style={{fontSize:12,color:'var(--text-muted)',padding:'8px 10px'}}>Nessun candidato trovato (o già iscritto)</div>}
             </div>
             <div style={s.modalActions}>
               <button style={s.btnSecondary} onClick={()=>setShowIscrizioneModal(false)}>Chiudi</button>
@@ -586,25 +586,25 @@ export default function Corsi() {
           <div style={s.overlay} onClick={()=>setShowPresenzeModal(false)}/>
           <div style={{...s.modal,width:'min(500px,96vw)'}}>
             <h3 style={s.modalTitle}>Presenze — {fmtIt(selectedSessione.data)}</h3>
-            <div style={{fontSize:12,color:'#888',marginBottom:8}}>
+            <div style={{fontSize:12,color:'var(--text-secondary)',marginBottom:8}}>
               {selectedSessione.ora_inizio?.slice(0,5)}–{selectedSessione.ora_fine?.slice(0,5)}
               {selectedSessione.sede&&` · ${selectedSessione.sede}`}
             </div>
-            {iscrizioni.length===0?<div style={{fontSize:13,color:'#aaa'}}>Nessun iscritto.</div>
+            {iscrizioni.length===0?<div style={{fontSize:13,color:'var(--text-muted)'}}>Nessun iscritto.</div>
             :iscrizioni.map(i=>{
               const p = presenze[i.candidato_id]
               return(
-                <div key={i.id} style={{display:'flex',alignItems:'center',gap:12,padding:'8px 0',borderBottom:'0.5px solid #f5f3ee',cursor:'pointer'}}
+                <div key={i.id} style={{display:'flex',alignItems:'center',gap:12,padding:'8px 0',borderBottom:'1px solid var(--border-light)',cursor:'pointer'}}
                   onClick={()=>togglePresenza(i.candidato_id)}>
-                  <div style={{width:28,height:28,borderRadius:'50%',background:p?.presente?'#1D9E75':'#e8e5e0',color:p?.presente?'#fff':'#888',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0}}>
+                  <div style={{width:28,height:28,borderRadius:'50%',background:p?.presente?'#1D9E75':'#e8e5e0',color:p?.presente?'var(--surface)':'var(--text-secondary)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0}}>
                     {p?.presente?'✓':''}
                   </div>
                   <div style={{flex:1,fontSize:13}}>{i.candidati?.nome} {i.candidati?.cognome}</div>
-                  <span style={{fontSize:12,color:p?.presente?'#27500A':'#aaa'}}>{p?.presente?'Presente':'Assente'}</span>
+                  <span style={{fontSize:12,color:p?.presente?'#27500A':'var(--text-muted)'}}>{p?.presente?'Presente':'Assente'}</span>
                 </div>
               )
             })}
-            <div style={{fontSize:12,color:'#888',marginTop:8}}>
+            <div style={{fontSize:12,color:'var(--text-secondary)',marginTop:8}}>
               Presenti: {Object.values(presenze).filter(p=>p.presente).length} / {iscrizioni.length}
             </div>
             <div style={s.modalActions}>
@@ -628,16 +628,16 @@ function PresenzaRow({ iscrizione, sessioni }) {
   const tot = presenze.filter(p=>p.presente).length
   return (
     <tr>
-      <td style={{padding:'8px 12px',borderBottom:'0.5px solid #f5f3ee',fontSize:13}}>
+      <td style={{padding:'8px 12px',borderBottom:'1px solid var(--border-light)',fontSize:13}}>
         {iscrizione.candidati?.nome} {iscrizione.candidati?.cognome}
       </td>
       {sessioni.map(s2=>{
         const p = presenze.find(p=>p.sessione_id===s2.id)
-        return <td key={s2.id} style={{padding:'8px 12px',borderBottom:'0.5px solid #f5f3ee',textAlign:'center',fontSize:14}}>
+        return <td key={s2.id} style={{padding:'8px 12px',borderBottom:'1px solid var(--border-light)',textAlign:'center',fontSize:14}}>
           {p?.presente?'✅':'⬜'}
         </td>
       })}
-      <td style={{padding:'8px 12px',borderBottom:'0.5px solid #f5f3ee',textAlign:'center',fontSize:12,fontWeight:600,color:'#1a3a5c'}}>
+      <td style={{padding:'8px 12px',borderBottom:'1px solid var(--border-light)',textAlign:'center',fontSize:12,fontWeight:600,color:'#1a3a5c'}}>
         {tot}/{sessioni.length}
       </td>
     </tr>
@@ -647,32 +647,32 @@ function PresenzaRow({ iscrizione, sessioni }) {
 const s = {
   wrap:{maxWidth:1200,margin:'0 auto'},
   topbar:{display:'flex',alignItems:'center',gap:8,marginBottom:'1rem'},
-  title:{fontSize:20,fontWeight:600,color:'#1a1a1a',flex:1,margin:0},
+  title:{fontSize:20,fontWeight:600,color:'var(--text)',flex:1,margin:0},
   layout:{display:'grid',gridTemplateColumns:'300px 1fr',gap:16,alignItems:'start'},
-  sidebar:{background:'#fff',border:'0.5px solid #e8e5e0',borderRadius:12,padding:'1rem',position:'sticky',top:0},
-  detail:{background:'#fff',border:'0.5px solid #e8e5e0',borderRadius:12,padding:'1.25rem',minHeight:400},
-  corsoCard:{padding:'10px 12px',borderRadius:8,cursor:'pointer',marginBottom:6,border:'0.5px solid #e8e5e0'},
+  sidebar:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'1rem',position:'sticky',top:0},
+  detail:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'1.25rem',minHeight:400},
+  corsoCard:{padding:'10px 12px',borderRadius:'var(--radius-sm)',cursor:'pointer',marginBottom:6,border:'1px solid var(--border)'},
   corsoCardActive:{background:'#f0f7ff',borderColor:'#1a3a5c'},
   tabs:{display:'flex',gap:4,marginBottom:'1.25rem',flexWrap:'wrap'},
-  tab:{padding:'5px 14px',border:'0.5px solid #e8e5e0',borderRadius:20,fontSize:12,cursor:'pointer',color:'#888'},
-  tabActive:{background:'#1a3a5c',color:'#fff',borderColor:'#1a3a5c'},
-  card:{background:'#fafaf8',border:'0.5px solid #e8e5e0',borderRadius:10,padding:'1rem'},
-  cardTitle:{fontSize:12,fontWeight:600,color:'#888',marginBottom:8,textTransform:'uppercase',letterSpacing:.5},
-  infoRow:{display:'flex',gap:8,fontSize:13,padding:'4px 0',borderBottom:'0.5px solid #f0ede8'},
-  infoLabel:{color:'#888',minWidth:130,flexShrink:0},
+  tab:{padding:'5px 14px',border:'1px solid var(--border)',borderRadius:20,fontSize:12,cursor:'pointer',color:'var(--text-secondary)'},
+  tabActive:{background:'var(--grad-primary)',color:'var(--surface)',borderColor:'#1a3a5c'},
+  card:{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:10,padding:'1rem'},
+  cardTitle:{fontSize:12,fontWeight:600,color:'var(--text-secondary)',marginBottom:8,textTransform:'uppercase',letterSpacing:.5},
+  infoRow:{display:'flex',gap:8,fontSize:13,padding:'4px 0',borderBottom:'1px solid var(--border-light)'},
+  infoLabel:{color:'var(--text-secondary)',minWidth:130,flexShrink:0},
   badge:{display:'inline-block',fontSize:11,padding:'2px 8px',borderRadius:20},
   table:{width:'100%',borderCollapse:'collapse',fontSize:13},
-  th:{padding:'9px 12px',textAlign:'left',color:'#888',fontWeight:400,borderBottom:'0.5px solid #f0ede8',background:'#fafaf8',fontSize:12},
+  th:{padding:'9px 12px',textAlign:'left',color:'var(--text-secondary)',fontWeight:400,borderBottom:'1px solid var(--border-light)',background:'var(--bg)',fontSize:12},
   overlay:{position:'fixed',inset:0,background:'rgba(0,0,0,0.18)',zIndex:20},
-  modal:{position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'#fff',border:'0.5px solid #e8e5e0',borderRadius:14,padding:'1.5rem',zIndex:30,width:'min(500px,96vw)',maxHeight:'92vh',overflowY:'auto',display:'flex',flexDirection:'column',gap:10},
-  modalTitle:{fontSize:16,fontWeight:600,color:'#1a1a1a',margin:0},
+  modal:{position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius-lg)',padding:'1.5rem',zIndex:30,width:'min(500px,96vw)',maxHeight:'92vh',overflowY:'auto',display:'flex',flexDirection:'column',gap:10},
+  modalTitle:{fontSize:16,fontWeight:600,color:'var(--text)',margin:0},
   modalActions:{display:'flex',gap:8,justifyContent:'flex-end',marginTop:4},
   field:{display:'flex',flexDirection:'column',gap:4},
-  label:{fontSize:12,color:'#888'},
-  input:{padding:'8px 10px',border:'0.5px solid #d8d5ce',borderRadius:8,fontSize:13,background:'#fafaf8',color:'#1a1a1a',outline:'none',width:'100%'},
-  suggest:{border:'0.5px solid #d8d5ce',borderRadius:8,background:'#fff',maxHeight:160,overflowY:'auto'},
-  suggestItem:{padding:'8px 10px',fontSize:13,cursor:'pointer',borderBottom:'0.5px solid #f0ede8'},
-  btnPrimary:{background:'#1a3a5c',color:'#fff',border:'none',borderRadius:8,padding:'7px 16px',fontSize:13,cursor:'pointer',fontWeight:500},
-  btnSecondary:{background:'#fff',color:'#333',border:'0.5px solid #d8d5ce',borderRadius:8,padding:'7px 14px',fontSize:13,cursor:'pointer'},
-  btnSmall:{background:'#fff',border:'0.5px solid #d8d5ce',borderRadius:6,padding:'4px 10px',fontSize:12,cursor:'pointer',color:'#333'},
+  label:{fontSize:12,color:'var(--text-secondary)'},
+  input:{padding:'8px 10px',border:'1px solid var(--border)',borderRadius:'var(--radius-sm)',fontSize:13,background:'var(--bg)',color:'var(--text)',outline:'none',width:'100%'},
+  suggest:{border:'1px solid var(--border)',borderRadius:'var(--radius-sm)',background:'var(--surface)',maxHeight:160,overflowY:'auto'},
+  suggestItem:{padding:'8px 10px',fontSize:13,cursor:'pointer',borderBottom:'1px solid var(--border-light)'},
+  btnPrimary:{background:'var(--grad-primary)',color:'var(--surface)',border:'none',borderRadius:'var(--radius-sm)',padding:'7px 16px',fontSize:13,cursor:'pointer',fontWeight:500},
+  btnSecondary:{background:'var(--surface)',color:'#333',border:'1px solid var(--border)',borderRadius:'var(--radius-sm)',padding:'7px 14px',fontSize:13,cursor:'pointer'},
+  btnSmall:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:6,padding:'4px 10px',fontSize:12,cursor:'pointer',color:'#333'},
 }
